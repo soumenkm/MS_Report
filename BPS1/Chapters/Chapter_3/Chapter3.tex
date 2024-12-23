@@ -1,0 +1,214 @@
+\chapter{Methodology}\singlespacing % Main chapter title
+
+\label{Chapter3} % Change X to a consecutive number; for referencing this chapter elsewhere, use \ref{ChapterX}
+
+\lhead{Chapter 3. \emph{Methodology}} % Change X to a consecutive number; this is for the header on each page - perhaps a shortened title
+
+%----------------------------------------------------------------------------------------
+%	SECTION 1
+%----------------------------------------------------------------------------------------
+
+\section{Definition of Neuron}
+
+In the context of multi layer perceptrons (MLPs) in large language models (LLMs), a \textit{neuron} refers to a unit of computation within the MLP module. Specifically, consider the $i^\text{th}$ layer of a Transformer architecture, where the input is a hidden state vector $\mathbf{H}^{i-1} \in \mathbb{R}^{T \times d}$, derived from the previous layer.
+
+\textbf{Hidden State Representation}:  The output of the multi-head self-attention (MHA) mechanism serves as input to the MLP and is given as:
+\begin{equation}
+\hat{\mathbf{H}}^i = \text{Attn}(\mathbf{H}^{i-1}\mathbf{W}_q^i, \mathbf{H}^{i-1}\mathbf{W}_k^i, \mathbf{H}^{i-1}\mathbf{W}_v^i) \cdot \mathbf{W}_o^i,
+\end{equation}
+where $\mathbf{W}_q^i, \mathbf{W}_k^i, \mathbf{W}_v^i, \mathbf{W}_o^i \in \mathbb{R}^{d \times d}$ are the trainable parameters of the self-attention module, and $\text{Attn}(\cdot)$ denotes the scaled dot-product attention operation.
+
+\textbf{MLP Transformation}: The MLP module takes $\hat{\mathbf{H}}^i$ as input and transforms it as follows:
+\begin{equation}
+\mathbf{h}^i = \text{act\_fn}(\hat{\mathbf{H}}^i \mathbf{W}_1^i) \cdot \mathbf{W}_2^i,
+\end{equation}
+where $\mathbf{W}_1^i \in \mathbb{R}^{d \times 4d}$ and $\mathbf{W}_2^i \in \mathbb{R}^{4d \times d}$ are learnable projection matrices, and $\text{act\_fn}(\cdot)$ represents a non-linear activation function such as GELU or SiLU.
+
+\textbf{Neuron}: Within the MLP, the $j^\text{th}$ neuron of the $i^\text{th}$ layer corresponds to the $j^\text{th}$ row of the intermediate activation matrix:
+\begin{equation}
+\mathbf{h}_j^i = \text{act\_fn}((\hat{\mathbf{H}}^i \mathbf{W}_1^i)_j),
+\end{equation}
+where $(\hat{\mathbf{H}}^i \mathbf{W}_1^i)_j$ represents the pre-activation value of the $j^\text{th}$ neuron.
+
+\textbf{Generalized Neuron Formulation}: Recent architectures such as LLaMA utilize Gated Linear Units (GLU) to enhance MLP performance, modifying the MLP computation as:
+\begin{equation}
+\mathbf{h}^i = [ \text{act\_fn}(\hat{\mathbf{H}}^i \mathbf{W}_1^i) \otimes (\hat{\mathbf{H}}^i \mathbf{W}_3^i) ] \cdot \mathbf{W}_2^i,
+\end{equation}
+where $\mathbf{W}_3^i \in \mathbb{R}^{d \times 4d}$ is an additional projection matrix, and $\otimes$ denotes element-wise multiplication. This formulation introduces gating to the MLP, allowing for more expressive transformations. Figure~\ref{fig:mlp} shows the architecture of the MLP module.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=\textwidth]{Chapters/Chapter_3/mlp.pdf} % Adjust the width as needed
+	\caption{Architecture of MLP module in LLaMA model}
+	\label{fig:mlp}
+\end{figure}
+
+\section{Dataset for Neuron Identification}
+
+For the purpose of identifying language-specific neurons, we utilize a subset of the Wikipedia dataset spanning 15 languages:
+\[
+\text{\{en, fr, es, vi, id, ja, zh, bn, hi, ta, te, mr, ur, kn, ml, pa\}}.
+\]
+Each language's dataset is preprocessed and passed through pretrained large language models (LLMs). The activations are then collected from the MLP modules of the models.
+
+\textbf{Dataset Description:}
+The Wikipedia dataset for each language contains a sequence of tokenized text data. Each tokenized sequence has a maximum length of $T_{\max} = 512$. For every sequence, we compute the activations from the MLP module, followed by averaging the activations at each neuron position across all sequences. This provides a language-specific profile for every neuron $(i, j)$ in the model.
+
+\textbf{Activation Collection:} 
+Given a pretrained LLM, let the MLP activation for the $i^\text{th}$ layer and the $j^\text{th}$ neuron in a specific language be represented by $h_{i,j}^t \in \mathbb{R}$, where $t$ indexes the token positions in a sequence of length $T$. The average activation of a neuron across all token positions for a given sequence is computed as:
+\begin{equation}
+\bar{h}_{i,j} = \frac{1}{T} \sum_{t=1}^{T} h_{i,j}^t,
+\end{equation}
+where $h_{i,j}^t$ is the neuron activation corresponding to the $t^\text{th}$ token.
+
+\textbf{Language-Specific Activations:}
+For each language $l$ in the dataset, we compute the average activation of each neuron $(i, j)$ over all sequences $S_l$ in the dataset:
+\begin{equation}
+H_{i,j}^l = \frac{1}{|S_l|} \sum_{s \in S_l} \bar{h}_{i,j}^{(s)},
+\end{equation}
+where $H_{i,j}^l$ represents the average activation of the $j^\text{th}$ neuron in the $i^\text{th}$ layer for language $l$, and $|S_l|$ denotes the number of sequences for language $l$.
+
+
+\section{Statistics of Neuron Activation}
+
+The statistics of neuron activation are precomputed to analyze language-specific patterns in the MLP layers of the pretrained large language models (LLMs). These statistics include mean, standard deviation, and quantiles (e.g., 5th, 10th, 25th, 50th, 75th, 90th, and 95th percentiles) of the neuron activations for each language in the dataset. The computations are performed across all layers and neurons within the MLP modules.
+
+\textbf{Activation Mean and Standard Deviation:} The mean activation of a neuron $(i, j)$ in the $t^\text{th}$ token position is computed as:
+\begin{equation}
+\mu_{i,j} = \frac{1}{T} \sum_{t=1}^T h_{i,j}^t,
+\end{equation}
+where $h_{i,j}^t$ is the activation of the $(i,j)$ neuron for the $t^\text{th}$ token, and $T$ is the total number of tokens in a sequence. Similarly, the standard deviation of the activations is calculated as:
+\begin{equation}
+\sigma_{i,j} = \sqrt{\frac{1}{T} \sum_{t=1}^T (h_{i,j}^t - \mu_{i,j})^2}.
+\end{equation}
+
+\textbf{Quantiles of Activation:} Quantile-based statistics provide insights into the distribution of activations for each neuron. The $q$-quantile activation value, denoted as $P_q$, is defined as:
+\begin{equation}
+P_q(h_{i,j}) = \inf \left\{x \in \mathbb{R} : F_{h_{i,j}}(x) \geq q \right\},
+\end{equation}
+where $F_{h_{i,j}}(x)$ is the cumulative distribution function (CDF) of the activations for neuron $(i, j)$. Commonly computed quantiles include:
+\[
+P_{50}, \, P_{75}, \, P_{90}, \, P_{95}, \, P_{25}, \, P_{10}, \, P_{5}.
+\]
+
+\textbf{Language-Specific Aggregation:} For a given language $l$ and all sequences in the dataset, the mean and other statistics are aggregated across all token positions and batches. Let $S_l$ denote the set of sequences for language $l$, and $B$ represent the batch size. The aggregated mean activation for neuron $(i, j)$ is computed as:
+\begin{equation}
+\bar{\mu}_{i,j}^l = \frac{1}{|S_l|} \sum_{b=1}^B \sum_{s \in S_l} \mu_{i,j}^{(s,b)},
+\end{equation}
+where $\mu_{i,j}^{(s,b)}$ is the mean activation of neuron $(i, j)$ for the $s^\text{th}$ sequence in the $b^\text{th}$ batch.
+
+\section {Methods for Neuron Identification}
+
+\subsection{LAPE}
+
+Language Activation Probability Entropy (LAPE) is a metric designed to identify neurons that exhibit language-specific behavior across multiple languages. This metric quantifies the entropy of normalized activation probabilities for each neuron across the given set of languages.
+
+\textbf{Step 1: Compute Activation Probabilities.} 
+For a pretrained large language model with $L$ layers and $4d$ neurons per layer, the activation of a neuron $(i, j)$ in response to a sequence $X^l \in \mathbb{R}^{N \times T}$ (where $N$ is the number of sequences, and $T$ is the number of tokens per sequence) for a language $l$ is denoted as $h_{i,j}^l$. The unnormalized activation probability for neuron $(i, j)$ is given by:
+\begin{equation}
+	p_{i,j}^l = \mathbb{E}\left[\mathbb{I}\left(h_{i,j}^l > 0\right)\right],
+\end{equation}
+where $\mathbb{I}$ is the indicator function that returns $1$ if the activation $h_{i,j}^l$ is greater than zero, and $0$ otherwise. The expectation is computed over all tokens in all sequences for language $l$.
+
+\textbf{Step 2: Normalize Activation Probabilities.} 
+The normalized activation probability is computed across $k$ languages to ensure a valid probability distribution:
+\begin{equation}
+	P_{i,j}^l = \frac{p_{i,j}^l}{\sum_{l=1}^k p_{i,j}^l}, \quad \forall i \in \{1, \dots, L\}, \, \forall j \in \{1, \dots, 4d\}.
+\end{equation}
+
+\textbf{Step 3: Compute Language Activation Probability Entropy.} 
+The entropy of the normalized activation probabilities for each neuron $(i, j)$ is computed as:
+\begin{equation}
+	\text{LAPE}(i, j) = - \sum_{l=1}^k P_{i,j}^l \log P_{i,j}^l, \quad \forall i \in \{1, \dots, L\}, \, \forall j \in \{1, \dots, 4d\}.
+\end{equation}
+This measures the uncertainty in the activation distribution of a neuron across the $k$ languages.
+
+\textbf{Step 4: Apply Threshold and Select Neurons.} 
+To identify neurons with significant language-specific behavior, a threshold is defined based on the $95^\text{th}$ percentile of the unnormalized activation probabilities:
+\begin{equation}
+	\text{Threshold} = \text{Quantile}_{0.95}\left(p_{i,j}^l \, | \, \forall i, j, l\right).
+\end{equation}
+A neuron $(i, j)$ is considered for language-specific analysis only if:
+\begin{equation}
+	\exists l \in \{1, \dots, k\} \, \text{such that} \, p_{i,j}^l > \text{Threshold}.
+\end{equation}
+
+\textbf{Step 5: Select Top Neurons Based on LAPE.} 
+The top $m$ neurons with the lowest LAPE values are selected for language-specific analysis, where $m$ is defined as:
+\begin{equation}
+	m = \frac{0.01 \times 4d \times L}{100}.
+\end{equation}
+This ensures that only the most language-specific neurons are retained for further interpretation.
+
+\textbf{Step 6: Identify Language-Specific Neuron Sets.} 
+For each neuron $(i, j)$ in the selected set, the language-specific set is defined as:
+\begin{equation}
+	\text{Lang\_Spec\_Set}(i, j) = \left\{ l \, | \, P_{i,j}^l > \text{Threshold} \right\}.
+\end{equation}
+
+A neuron is considered specific to a subset of languages if:
+\begin{equation}
+	\text{Lang\_Spec\_Set}(i, j) \subseteq \{1, 2, \dots, k\}.
+\end{equation}
+
+\subsection{Activation Based Methods}
+
+\textbf{Absolute Activation:} The absolute activation metric measures the mean absolute activation of each neuron \((i, j)\) in the \(i^\text{th}\) layer across all tokens in a sequence for a language \(l\). This is computed as:
+\begin{equation}
+	r_{i,j}^l = \mathbb{E}\left[\left| h_{i,j}^l \right|\right],
+\end{equation}
+where \( h_{i,j}^l \) is the activation of neuron \((i, j)\) for language \(l\), and the expectation is taken over all tokens and sequences. This metric identifies neurons with consistently high absolute activations, which are indicative of their overall importance in representing language features.
+
+\textbf{Activation Probability Zero:} The activation probability zero metric measures the fraction of times a neuron \((i, j)\) has a positive activation for a language \(l\). It is defined as:
+\begin{equation}
+	r_{i,j}^l = \mathbb{E}\left[\mathbb{I}\left(h_{i,j}^l > 0\right)\right],
+\end{equation}
+where \(\mathbb{I}\) is the indicator function that returns 1 if \(h_{i,j}^l > 0\), and 0 otherwise. This metric captures the frequency of a neuron's activation, providing insights into its contribution to language-specific representations.
+
+\textbf{Activation Probability Mean:} The activation probability mean measures the probability of a neuron's activation exceeding the mean activation value for its layer, \(\mu_{i,j}^l\), for a language \(l\). It is computed as:
+\begin{equation}
+	r_{i,j}^l = \mathbb{E}\left[\mathbb{I}\left(h_{i,j}^l > \mu_{i,j}^l\right)\right],
+\end{equation}
+where \(\mu_{i,j}^l\) represents the average activation of neuron \((i, j)\) in the \(i^\text{th}\) layer for language \(l\). This metric identifies neurons with activations that are consistently above the average, highlighting neurons that are highly responsive to language-specific features.
+
+\textbf{Activation Probability 90p:} The activation probability 90p measures the probability of a neuron's activation exceeding the 90th percentile activation value for its layer, \(\text{P90}_{i,j}^l\), for a language \(l\). This is given by:
+\begin{equation}
+	r_{i,j}^l = \mathbb{E}\left[\mathbb{I}\left(h_{i,j}^l > \text{P90}_{i,j}^l\right)\right],
+\end{equation}
+where \(\text{P90}_{i,j}^l\) represents the 90th percentile of the activations of neuron \((i, j)\) in the \(i^\text{th}\) layer for language \(l\). This metric identifies neurons that exhibit rare but significant activations, which may correspond to specialized processing for certain linguistic features.
+
+Language-specific neurons are identified based on activation values computed across different languages. For each language, activations are collected, and neurons that exhibit the highest relevance are selected using the following process.
+
+\textbf{Step 1: Compute Activation Relevance.} 
+For each language \(l \in \{1, 2, \dots, k\}\), compute the activation relevance values for all neurons \((i, j)\) in the pretrained model. Let the relevance for neuron \((i, j)\) in the \(i^\text{th}\) layer for language \(l\) be denoted as \(r_{i,j}^l\). This relevance is calculated using one of the activation probability methods, such as:
+\begin{equation}
+	r_{i,j}^l = \mathbb{E}\left[\mathbb{I}\left(h_{i,j}^l > 0\right)\right],
+\end{equation}
+or other methods such as absolute activation or percentile-based thresholds, depending on the desired analysis.
+
+\textbf{Step 2: Aggregate Relevance Across Layers and Neurons.} 
+For each language \(l\), the computed relevance values \(r_{i,j}^l\) are aggregated across all layers and neurons. The total number of layers is denoted by \(L\), and the dimensionality of the neurons in each layer is \(4d\). The relevance tensor for language \(l\) is represented as:
+\begin{equation}
+	R^l = \{r_{i,j}^l \, | \, i \in \{1, \dots, L\}, \, j \in \{1, \dots, 4d\}\}.
+\end{equation}
+
+\textbf{Step 3: Select Top Neurons.} 
+For each language \(l\), the top \(m\) neurons with the highest relevance values are selected. The value of \(m\) is determined as a small fraction of the total number of neurons in the model:
+\begin{equation}
+	m = \frac{0.125 \times L \times 4d}{100}.
+\end{equation}
+The top \(m\) neurons are identified by sorting the relevance values in \(R^l\) and selecting the indices of the \(m\) largest values:
+\begin{equation}
+	\text{Top}_m(R^l) = \text{argsort\_descending}_m \left\{r_{i,j}^l | \forall i, j\right\}.
+\end{equation}
+
+\textbf{Step 4: Map Neurons to Layers and Positions.} 
+The indices of the top \(m\) neurons are mapped back to their corresponding layers and positions. For each language \(l\), the selected neurons are represented as:
+\begin{equation}
+	N^l = \{(i, j) \, | \, (i, j) \in \text{Top}_m(R^l)\},
+\end{equation}
+where \(N^l\) is the set of top \(m\) neurons for language \(l\).
+
+This process ensures that neurons with the highest language-specific relevance are identified for each language. These neurons can then be analyzed further to understand their behavior and contribution to language modeling tasks.
+
+\section{Neuron Finetuing using LoRA}

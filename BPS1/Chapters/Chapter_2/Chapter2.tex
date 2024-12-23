@@ -1,0 +1,28 @@
+% Chapter Template
+
+\chapter{Literature Review}\singlespacing % Main chapter title
+
+\label{Chapter2} % Change X to a consecutive number; for referencing this chapter elsewhere, use \ref{ChapterX}
+
+\lhead{Chapter 2. \emph{Literature Review}} % 
+
+\section{Language-Specific Neurons in Multilingual Models}
+A significant body of work has focused on understanding and isolating language-specific neurons within large language models (LLMs). The paper \textit{Language-Specific Neurons in Multilingual Language Models} (\href{https://arxiv.org/abs/2404.02431}{ArXiv:2404.02431}) investigates techniques for identifying neurons that are specific to certain languages and evaluates their impact on tasks such as machine translation and multilingual understanding. Building on this, our research extends the idea by evaluating alternative methods such as replacing median activations with layer-specific median or 75th percentile activations and exploring whether language-specific neuron sets vary across datasets, tasks, and model layers.
+
+The reproduction of results from the \textit{Language-Specific Regions} paper (\href{https://arxiv.org/abs/2402.16438}{ArXiv:2402.16438}) further validated the connection between perplexity changes and language specificity in LLMs. The study provided insights into how replacing or interpolating neuron activations affects task performance, particularly for low-resource languages. These findings underline the importance of understanding neuron activity patterns for improving multilingual tasks. For instance, experiments demonstrated that full replacement of language-specific neurons may degrade performance, while linearly interpolating activation values can balance task performance and neuron specificity.
+
+\section{Mechanistic Interpretability and Multilinguality}
+The broader context of neuron analysis in multilingual LLMs intersects with mechanistic interpretability, as explored in works such as the \textit{SoLU Activation Function} (\href{https://transformer-circuits.pub/2022/solu/index.html}{SoLU paper}) and \textit{Tracing the Roots of Facts in Multilingual Models} (\href{https://arxiv.org/abs/2403.05189}{ArXiv:2403.05189}). The former highlights methods to reduce polysemanticity in neurons, which could aid in isolating neurons responsible for specific linguistic features. Meanwhile, the latter paper delves into probing techniques for factual association in multilingual models, suggesting that neuron activity patterns can vary significantly depending on the dataset and task.
+
+This thesis builds on these foundational ideas by experimenting with probing methods such as L1 and L2 norms and designing novel interventions in neuron activations. The literature also emphasizes how architectural changes, such as adding adapter layers or modifying attention heads, can enhance model performance on multilingual tasks. The exploration of neuron activity patterns for cross-lingual transfer, fact probing, and multilingual perplexity maps adds depth to the understanding of language representation in LLMs.
+
+\section{Applications to Low-Resource Languages}
+Addressing performance disparities for low-resource languages is a recurring theme across the literature. Papers such as \textit{Locating and Editing Factual Associations in GPT} and \textit{Discovering Salient Neurons in Deep NLP Models} highlight methodologies for identifying and modifying neurons to improve downstream task performance. This aligns with our research objectives, particularly in the context of improving natural language inference (NLI) and translation tasks for low-resource languages. Techniques such as activation replacement, layer freezing, and fine-tuning specific neurons have shown promise in achieving consistent task performance across diverse linguistic settings.
+
+
+
+
+
+
+
+

@@ -1,0 +1,32 @@
+% Chapter Template
+
+\chapter{Introduction}\singlespacing % Main chapter title
+
+\label{Chapter1} % Change X to a consecutive number; for referencing this chapter elsewhere, use \ref{ChapterX}
+
+\lhead{Chapter 1. \emph{Introduction}} % Change X to a consecutive number; this is for the header on each page - perhaps a shortened title
+
+%----------------------------------------------------------------------------------------
+%	SECTION 1
+%----------------------------------------------------------------------------------------
+\section{Introduction}
+
+The emergence of large language models (LLMs) has transformed natural language processing (NLP), enabling remarkable advancements across a wide range of linguistic tasks. Despite their success, challenges persist in ensuring comparable performance for low-resource languages, which often lack sufficient representation in pretraining datasets. This thesis addresses these challenges by investigating the representation of language-specific information within LLMs and exploring methods to identify and utilize language-specific neurons. By focusing on multilingual tasks such as natural language inference (NLI), this research seeks to better understand how language-specific information is encoded and how it can be effectively utilized to improve performance, particularly for underrepresented languages.
+
+The research builds on recent advancements in neuron analysis and fine-tuning techniques, using models such as Llama3.1, Bloomz, and Aya to explore the relationship between architectural choices, pretraining datasets, and language-specific representations. By employing methods such as activation probability entropy and LoRA-based fine-tuning, the study systematically identifies language-specific neurons and evaluates their role in downstream tasks. Through detailed experiments on layer-specific fine-tuning, freezing, and intervention strategies, the thesis aims to provide a comprehensive understanding of the mechanisms underlying multilingual capabilities in LLMs.
+
+\section{Motivation}
+
+In the era of multilingual LLMs, achieving consistent performance across diverse languages remains a significant challenge. High-resource languages benefit from extensive pretraining data and resources, leading to superior performance on downstream tasks, while low-resource languages often lag behind. Addressing this imbalance is essential for ensuring that the advancements in NLP benefit speakers of all languages, regardless of the resources available for their linguistic representation.
+
+Understanding the internal mechanisms of LLMs, specifically how they represent language-specific information, offers an way to addressing these challenges. By identifying language-specific neurons and their roles in encoding linguistic knowledge, we can develop targeted interventions to improve performance for low-resource languages. This research is driven by the need to close the performance gap, advance the understanding of multilingual model architectures, and contribute to the development of fair and inclusive NLP systems.
+
+\section{Problem Statement}
+
+While LLMs exhibit strong multilingual capabilities, their performance across languages is often inconsistent, with low-resource languages showing suboptimal results compared to high-resource counterparts. This disparity can be attributed to the lack of sufficient representation for low-resource languages during pretraining and the challenge of effectively isolating and utilizing language-specific information within these models. Existing methods for identifying language-specific neurons often rely on arbitrary thresholds or lack generalizability across different architectures and datasets. Moreover, the impact of architectural modifications, such as layer-specific fine-tuning or neuron freezing, on language-specific representation and downstream performance remains underexplored.
+
+This research aims to address these limitations by developing systematic approaches to identify and analyze language-specific neurons in LLMs. By focusing on techniques such as neuron activation probability and LoRA-based fine-tuning, the study seeks to bridge the gap in understanding how language-specific information is encoded. The ultimate goal is to improve task performance for low-resource languages without requiring extensive annotated data, thereby contributing to the application of LLMs in multilingual settings.
+
+
+
+ 

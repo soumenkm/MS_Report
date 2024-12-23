@@ -121,7 +121,7 @@ The entropy of the normalized activation probabilities for each neuron $(i, j)$ 
 \begin{equation}
 	\text{LAPE}(i, j) = - \sum_{l=1}^k P_{i,j}^l \log P_{i,j}^l, \quad \forall i \in \{1, \dots, L\}, \, \forall j \in \{1, \dots, 4d\}.
 \end{equation}
-This measures the uncertainty in the activation distribution of a neuron across the $k$ languages.
+This measures the uncertainty in the activation distribution of a neuron across the $k$ languages. Figure~\ref{fig:lape} shows the procedure of computing LAPE for a neuron.
 
 \textbf{Step 4: Apply Threshold and Select Neurons.} 
 To identify neurons with significant language-specific behavior, a threshold is defined based on the $95^\text{th}$ percentile of the unnormalized activation probabilities:
@@ -138,7 +138,7 @@ The top $m$ neurons with the lowest LAPE values are selected for language-specif
 \begin{equation}
 	m = \frac{0.01 \times 4d \times L}{100}.
 \end{equation}
-This ensures that only the most language-specific neurons are retained for further interpretation.
+This ensures that only the most language-specific neurons are retained for further interpretation. 
 
 \textbf{Step 6: Identify Language-Specific Neuron Sets.} 
 For each neuron $(i, j)$ in the selected set, the language-specific set is defined as:
@@ -150,6 +150,13 @@ A neuron is considered specific to a subset of languages if:
 \begin{equation}
 	\text{Lang\_Spec\_Set}(i, j) \subseteq \{1, 2, \dots, k\}.
 \end{equation}
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=\textwidth]{Chapters/Chapter_3/lape.pdf} % Adjust the width as needed
+	\caption{Procedure of computing LAPE for a neuron.}
+	\label{fig:lape}
+\end{figure}
 
 \subsection{Activation Based Methods}
 
@@ -211,4 +218,84 @@ where \(N^l\) is the set of top \(m\) neurons for language \(l\).
 
 This process ensures that neurons with the highest language-specific relevance are identified for each language. These neurons can then be analyzed further to understand their behavior and contribution to language modeling tasks.
 
-\section{Neuron Finetuing using LoRA}
+\section{Neuron Fine-Tuning using LoRA for a Task}
+
+\textbf{LoRA (Low-Rank Adaptation)}: LoRA introduces a mechanism to fine-tune a subset of parameters in neural networks, focusing on reducing computational overhead. For our application, we utilize LoRA to specifically fine-tune targeted neurons in the MLP layer while freezing others. This method ensures that the pretrained parameters \(W_{pt}\) remain untouched, and \(\Delta W\) represents the modifications applied to the network during fine-tuning.
+
+\textbf{Fine-Tuning with LoRA AB Decomposition.} The matrix \(\Delta W\) is expressed as:
+\begin{equation}
+	\Delta W = A \cdot B,
+\end{equation}
+where \(A \in \mathbb{R}^{d_{in} \times r}\) and \(B \in \mathbb{R}^{r \times d_{out}}\) are low-rank matrices. The rank \(r\) is typically much smaller than \(d_{in}\) or \(d_{out}\), reducing the number of trainable parameters. Masks are applied to \(A\) and \(B\) to control the fine-tuning of specific neurons:
+\begin{equation}
+	A = \text{masked\_A} \cdot A_t, \quad B = \text{masked\_B} \cdot B_t,
+\end{equation}
+where \(\text{masked\_A}\) and \(\text{masked\_B}\) are binary masks, and \(A_t\) and \(B_t\) are trainable parameters.
+
+\textbf{Description of Masked Matrices:}
+
+The binary masks \(\text{masked\_A}\) and \(\text{masked\_B}\) are defined to control the fine-tuning process by selectively freezing specific neurons.
+\[
+	\text{masked\_A} \in \mathbb{R}^{d_{in} \times r}, \quad
+	\text{masked\_B} \in \mathbb{R}^{r \times d_{out}},
+\]
+where \(d_{in}\) and \(d_{out}\) are the input and output dimensions of the layer, and \(r\) is the rank of the LoRA decomposition.
+
+\textbf{Masked Matrix \(\text{masked\_A}\):}
+\(\text{masked\_A}\) is defined as:
+\begin{equation}
+	[\text{masked\_A}]_{ij} = 1, \quad \forall i \in \{1, \dots, d_{in}\}, \, \forall j \in \{1, \dots, r\}.
+\end{equation}
+This indicates that no masking is applied to the rows of \(A\), and all elements of \(\text{masked\_A}\) are set to 1.
+
+\textbf{Masked Matrix \(\text{masked\_B}\):}
+For \(\text{masked\_B}\), specific columns corresponding to frozen neurons are set to 0. For a neuron index \(j_f \in \text{Frozen Neurons}\), the mask is defined as:
+\begin{equation}
+	[\text{masked\_B}]_{ij} = 
+	\begin{cases} 
+		0, & \text{if } j = j_f, \, j_f \in \text{Frozen Neurons}, \\
+		1, & \text{otherwise}.
+	\end{cases}
+\end{equation}
+
+\textbf{Final Masking Condition:}
+The effective masked matrices for \(A\) and \(B\) are:
+\begin{equation}
+	A = \text{masked\_A} \cdot A_t, \quad
+	B = \text{masked\_B} \cdot B_t,
+\end{equation}
+where \(A_t \in \mathbb{R}^{d_{in} \times r}\) and \(B_t \in \mathbb{R}^{r \times d_{out}}\) are the trainable LoRA matrices.
+
+This masking ensures that updates to the frozen neurons are completely suppressed, while other neurons remain trainable during fine-tuning.
+
+\textbf{Frozen Neurons.} To freeze specific neurons, columns of \(B\) corresponding to the frozen neurons are masked with zeros. For neuron indices \(j\) in the set of frozen neurons, we ensure:
+\begin{equation}
+	\Delta W_{i,j} = 0, \quad \forall i.
+\end{equation}
+This prevents any updates to these neurons during fine-tuning.
+
+\textbf{Final Output.} The fine-tuned output of the MLP layer is given by:
+\begin{equation}
+	y = x \cdot W + x \cdot \Delta W,
+\end{equation}
+where \(W\) is the original weight matrix, and \(\Delta W\) introduces targeted updates through LoRA.
+
+\textbf{Targeted Language Neurons.} Language-specific neurons are identified and fine-tuned using LoRA. This targeted approach ensures that only the relevant neurons for a particular language are adapted while the others remain unchanged. For the frozen neurons, \(\Delta W\) remains zero:
+\begin{equation}
+	\Delta W_{i,j} = 0, \quad \text{if } j \in \text{Frozen Neurons}.
+\end{equation}
+
+\textbf{Additional Fine-Tuning.} Besides fine-tuning the MLP layer, the attention mechanisms (\(q, k, v, o\) projections) and the task-specific classifier head are always fine-tuned using LoRA. This ensures the overall task-specific performance is preserved while leveraging the language neurons for targeted adaptation. Figure~\ref{fig:lora} shows the procedure of finetuning target neurons using LoRA.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=\textwidth]{Chapters/Chapter_3/lora.pdf} % Adjust the width as needed
+	\caption{LoRA fine tuning method for target neurons.}
+	\label{fig:lora}
+\end{figure}
+
+
+
+
+
+

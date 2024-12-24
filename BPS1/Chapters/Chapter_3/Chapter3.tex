@@ -222,6 +222,23 @@ where \(N^l\) is the set of top \(m\) neurons for language \(l\).
 
 This process ensures that neurons with the highest language-specific relevance are identified for each language. These neurons can then be analyzed further to understand their behavior and contribution to language modeling tasks.
 
+\subsection{Task Neurons for a Language}
+
+In this method, we introduce an alternative method based on task-specific neurons computed from the task specific dataset (for example XNLI dataset). Unlike language-specific neurons, which are computed using activation patterns derived from Wikipedia sentences, the task neurons are computed by processing the training sentences from the task dataset for each respective language. This modification allows the identification of neurons that are not only language-specific but also task-specific, capturing finer granularity of representations relevant to the classification task.
+
+\textbf{Activation of Task-Specific Neurons:} The activation pattern for task-specific neurons is derived as:
+\begin{equation}
+	h^{\text{task}}_{ij} = \text{stat}_{ij}^{\text{task}}, \quad \forall \text{stat} \in \{\mu, p_{90}, p_{75}, p_{50}, p_{25}, p_{10}, p_{5}\},
+\end{equation}
+where:
+\begin{itemize}
+	\item $h^{\text{task}}_{ij}$ represents the activation for the $i$-th layer and $j$-th neuron under task-specific conditions.
+	\item $\text{stat}_{ij}^{\text{task}}$ denotes the statistical activation computed over all task specific training sentences in a given language.
+	\item The set $\{\mu, p_{90}, p_{75}, p_{50}, p_{25}, p_{10}, p_{5}\}$ represents the mean, 90th percentile, 75th percentile, and other quantile thresholds used to analyze neuron activation levels.
+\end{itemize}
+
+Once the activation is computed for a task, then we can apply the LAPE or any activation based methods to compute the task specific neurons.
+
 \section{Neuron Fine-Tuning using LoRA for a Task}
 
 \textbf{LoRA (Low-Rank Adaptation)}: LoRA introduces a mechanism to fine-tune a subset of parameters in neural networks, focusing on reducing computational overhead. For our application, we utilize LoRA to specifically fine-tune targeted neurons in the MLP layer while freezing others. This method ensures that the pretrained parameters \(W_{pt}\) remain untouched, and \(\Delta W\) represents the modifications applied to the network during fine-tuning.

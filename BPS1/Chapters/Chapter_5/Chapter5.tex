@@ -10,7 +10,7 @@
 %	SECTION 1
 %----------------------------------------------------------------------------------------
 
-\section{LAPE Experiments}
+\section{LAPE Neuron Analysis}
 
 \subsection{Language Sets}
 
@@ -172,67 +172,7 @@ From Figure \ref{fig:ppx_change}, we observe the following key trends:
 	\item For \textbf{Set3}, interventions at \textit{ur} result in significant perplexity changes for other low-resource languages like \textit{ta, te}, highlighting the influence of high-representation languages on their low-representation counterparts.
 \end{itemize}
 
-\subsection{XNLI Task Results After Targeted Neurons Fine-Tuning}
-
-Table~\ref{tab:xnli_results} summarizes the results of the fine-tuning experiments on the XNLI task. These experiments involve evaluating the zero-shot performance of the model on Vietnamese (\textit{vi}), Hindi (\textit{hi}), and Urdu (\textit{ur}) after targeted neuron fine-tuning and statistical interventions. The table reports the results (\textit{No Int}) alongside the effects of interventions using statistical patterns (\textit{Mean}, P75, P90, and P95).
-
-\textbf{Insights from Results:}
-\begin{itemize}
-	\item \textbf{No Intervention Performance:} The model (\textit{No Int}) achieves robust zero-shot performance for all three languages. For instance, in \textit{vi}, the baseline accuracy is highest (0.8053) with no fine-tuning of neurons.
-	\item \textbf{Impact of Interventions:} Statistical interventions generally degrade the model's performance. The degradation becomes more significant with higher percentiles (e.g., P90 and P95), indicating that extreme activation values may negatively affect generalization.
-	\item \textbf{Language-Specific Trends:} For \textit{ur}, fine-tuning both English and Urdu neurons (\textit{set6\_en + ur}) shows marginal improvement in baseline performance compared to other setups. However, statistical interventions still result in performance drops.
-	\item \textbf{Fine-Tuning Trade-Offs:} Fine-tuning neurons specific to the target language (\textit{set1\_vi, set6\_hi, set6\_ur}) offers better specialization for the target language. However, this comes at the cost of reduced generalization, as seen in the reduced accuracy for higher percentiles.
-\end{itemize}
-
-\begin{table}[ht]
-	\centering
-	\renewcommand{\arraystretch}{1.3}
-	\setlength{\tabcolsep}{4pt}
-	\begin{tabularx}{\textwidth}{|X|X|X|X|X|X|X|}
-		\hline
-		\textbf{Fine-tune Neurons} & \textbf{Eval Lang} & \textbf{No Int} & \textbf{Int by $\mu$} & \textbf{Int by P75} & \textbf{Int by P90} & \textbf{Int by P95} \\
-		\hline
-		null & vi & 0.8053 & 0.7955 & 0.7915 & 0.7903 & 0.7897 \\
-		set1\_en & vi & 0.8017 & 0.7957 & 0.7867 & 0.7847 & 0.7847 \\
-		set1\_vi & vi & 0.8007 & 0.7951 & 0.7881 & 0.7855 & 0.7845 \\
-		set1\_en+vi & vi & 0.8009 & 0.7943 & 0.7865 & 0.7845 & 0.7833 \\
-		\hline
-		null & hi & 0.7501 & 0.7521 & 0.7496 & 0.7499 & 0.7506 \\
-		set1\_en & hi & 0.7476 & 0.7456 & 0.7454 & 0.7448 & 0.7434 \\
-		set6\_en & hi & 0.7491 & 0.7456 & 0.7464 & 0.7458 & 0.7441 \\
-		set6\_hi & hi & 0.7492 & 0.7456 & 0.7461 & 0.7448 & 0.7431 \\
-		set6\_en+hi & hi & 0.7488 & 0.7448 & 0.7451 & 0.7446 & 0.7431 \\
-		\hline
-		null & ur & 0.7002 & 0.7044 & 0.7028 & 0.6938 & 0.6904 \\
-		set6\_en & ur & 0.6984 & 0.7041 & 0.7026 & 0.6964 & 0.6923 \\
-		set6\_ur & ur & 0.6984 & 0.7054 & 0.7024 & 0.6952 & 0.6913 \\
-		set6\_en+ur & ur & 0.6992 & 0.7061 & 0.7021 & 0.6954 & 0.6919 \\
-		\hline
-	\end{tabularx}
-	\caption{XNLI task results after targeted neurons fine-tuning for LAPE method. The training language is always English.}
-	\label{tab:xnli_results}
-\end{table}
-
-The results highlight the complexities of fine-tuning specific neurons for multilingual tasks. While targeted fine-tuning can improve certain aspects of language specialization, it often comes at the cost of generalization.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-\section{Activation Probability 90p Experiments}
+\section{Activation Probability 90p Neuron Analysis}
 
 \subsection{Language Neuron Distribution}
 
@@ -281,6 +221,299 @@ The experimental results for the perplexity change (\textit{PPXC}) are presented
 	
 	\item \textbf{Further Analysis Required:} The exact mechanisms underlying these phenomena are unclear and require further exploration. Factors such as the resource level of the languages, the layer-wise distribution of neurons, and the training dynamics of shared representations could play a critical role.
 \end{itemize}
+
+\section{Fine-Tuning Experiment Results on XNLI Task}
+
+\subsection{Baseline Experiment Results}
+
+ The baseline experiments establish a framework for evaluating different fine-tuning configurations on the XNLI task. Two key baselines are explored: \textit{Zero-Shot Transfer} and \textit{Direct Fine-Tuning}. Zero-shot transfer involves testing a model fine-tuned on English (\textit{en}) on other languages without further adaptation. In contrast, direct fine-tuning entails training the model explicitly on the target language data. These baselines are compared to assess the effectiveness of targeted interventions in language-specific neurons.
+
+\begin{table}[ht]
+	\centering
+	\renewcommand{\arraystretch}{1.3}
+	\setlength{\tabcolsep}{8pt}
+	\begin{tabularx}{\textwidth}{|X|X|X|X|}
+		\hline
+		\textbf{Baseline Type} & \textbf{Train Lang} & \textbf{Eval Lang} & \textbf{No Int Accuracy} \\
+		\hline
+		Zero Shot & en & vi & 0.8053 \\
+		& en & hi & 0.7501 \\
+		& en & ur & 0.7002 \\
+		\hline
+		Direct Fine-tuning & vi & vi & 0.8511 \\
+		& hi & hi & 0.8043 \\
+		& ur & ur & 0.6697 \\
+		\hline
+	\end{tabularx}
+	\caption{Baseline results for the XNLI task for Llama 3.1.}
+	\label{tab:updated_baseline_results}
+\end{table}
+
+\textbf{Insights from Baselines:}
+The results from Table~\ref{tab:updated_baseline_results} highlight several important observations:
+
+1. \textbf{Zero-Shot Transfer Performance:} 
+For languages such as Vietnamese (\textit{vi}), zero-shot transfer using an English-fine-tuned model achieves an accuracy of 0.8053. This is a reasonable performance considering the linguistic divergence between English and Vietnamese, demonstrating the model's generalization capabilities.
+
+2. \textbf{Direct Fine-Tuning Performance:}
+As expected, direct fine-tuning on the target language outperforms zero-shot transfer in all cases. For instance, fine-tuning directly on Vietnamese (\textit{vi}) data yields an accuracy of 0.8511, surpassing the zero-shot accuracy by a significant margin.
+
+3. \textbf{Performance Gap Between Languages:}
+The gap in accuracy between zero-shot transfer and direct fine-tuning is more pronounced for Vietnamese (\textit{vi}) compared to Hindi (\textit{hi}) and Urdu (\textit{ur}). For \textit{hi} and \textit{ur}, the zero-shot performance (0.7501 and 0.7002, respectively) is relatively closer to the directly fine-tuned results (0.8043 and 0.6697, respectively). This suggests that the model may share common linguistic representations between English and these languages, leading to better transferability.
+
+4. \textbf{Challenges with Low-Resource Languages:}
+The observation that direct fine-tuning for Urdu (\textit{ur}) yields lower accuracy (0.6697) compared to zero-shot transfer (0.7002) suggests several plausible reasons. Firstly, the dataset used for fine-tuning might be limited in size or quality, leading to insufficient adaptation to the target language. The pretrained model's underrepresentation of Urdu during training, combined with its unique linguistic and script characteristics, might also limit the efficacy of fine-tuning. In contrast, zero-shot transfer leverages cross-lingual embeddings and the model's generalized multilingual capabilities, enabling better performance without the risk of overwriting or overfitting. This highlights the challenges of fine-tuning low-resource languages like Urdu and underscores the need for more robust and targeted approaches. 
+
+The baseline results establish that direct fine-tuning on target languages consistently improves performance. However, the competitive zero-shot performance for certain languages underscores the robustness of transfer learning. These findings provide a foundation for further evaluation of targeted interventions in language-specific neurons.
+
+
+\subsection{LAPE Experiment Results using Lang Specific Neurons}
+
+Table~\ref{tab:xnli_results} summarizes the results of the fine-tuning experiments on the XNLI task. These experiments involve evaluating the zero-shot performance of the model on Vietnamese (\textit{vi}), Hindi (\textit{hi}), and Urdu (\textit{ur}) after targeted neuron fine-tuning and statistical interventions. The table reports the results (\textit{No Int}) alongside the effects of interventions using statistical patterns (\textit{Mean}, P75, P90, and P95).
+
+\textbf{Insights from Results of Intervention with Higher Quantiles:}
+\begin{itemize}
+	\item \textbf{No Intervention Performance:} The model (\textit{No Int}) achieves robust zero-shot performance for all three languages. For instance, in \textit{vi}, the baseline accuracy is highest (0.8053) with no fine-tuning of neurons.
+	\item \textbf{Impact of Interventions:} Statistical interventions generally degrade the model's performance. The degradation becomes more significant with higher percentiles (e.g., P90 and P95), indicating that extreme activation values may negatively affect generalization.
+	\item \textbf{Language-Specific Trends:} For \textit{ur}, fine-tuning both English and Urdu neurons (\textit{set6\_en + ur}) shows marginal improvement in baseline performance compared to other setups. However, statistical interventions still result in performance drops.
+	\item \textbf{Fine-Tuning Trade-Offs:} Fine-tuning neurons specific to the target language (\textit{set1\_vi, set6\_hi, set6\_ur}) offers better specialization for the target language. However, this comes at the cost of reduced generalization, as seen in the reduced accuracy for higher percentiles.
+\end{itemize}
+
+\begin{table}[ht]
+	\centering
+	\renewcommand{\arraystretch}{1.3}
+	\setlength{\tabcolsep}{4pt}
+	\begin{tabularx}{\textwidth}{|X|X|X|X|X|X|X|}
+		\hline
+		\textbf{Fine-tune Neurons} & \textbf{Eval Lang} & \textbf{No Int} & \textbf{Int by $\mu$} & \textbf{Int by P75} & \textbf{Int by P90} & \textbf{Int by P95} \\
+		\hline
+		null & vi & 0.8053 & 0.7955 & 0.7915 & 0.7903 & 0.7897 \\
+		set1\_en & vi & 0.8017 & 0.7957 & 0.7867 & 0.7847 & 0.7847 \\
+		set1\_vi & vi & 0.8007 & 0.7951 & 0.7881 & 0.7855 & 0.7845 \\
+		set1\_en+vi & vi & 0.8009 & 0.7943 & 0.7865 & 0.7845 & 0.7833 \\
+		\hline
+		null & hi & 0.7501 & 0.7521 & 0.7496 & 0.7499 & 0.7506 \\
+		set1\_en & hi & 0.7476 & 0.7456 & 0.7454 & 0.7448 & 0.7434 \\
+		set6\_en & hi & 0.7491 & 0.7456 & 0.7464 & 0.7458 & 0.7441 \\
+		set6\_hi & hi & 0.7492 & 0.7456 & 0.7461 & 0.7448 & 0.7431 \\
+		set6\_en+hi & hi & 0.7488 & 0.7448 & 0.7451 & 0.7446 & 0.7431 \\
+		\hline
+		null & ur & 0.7002 & 0.7044 & 0.7028 & 0.6938 & 0.6904 \\
+		set6\_en & ur & 0.6984 & 0.7041 & 0.7026 & 0.6964 & 0.6923 \\
+		set6\_ur & ur & 0.6984 & 0.7054 & 0.7024 & 0.6952 & 0.6913 \\
+		set6\_en+ur & ur & 0.6992 & 0.7061 & 0.7021 & 0.6954 & 0.6919 \\
+		\hline
+	\end{tabularx}
+	\caption{XNLI task results (intervention by higher quantiles) after targeted neurons fine-tuning for LAPE method for Llama3.1. The training language is always English.}
+	\label{tab:xnli_results}
+\end{table}
+
+The results highlight the complexities of fine-tuning specific neurons for multilingual tasks. While targeted fine-tuning can improve certain aspects of language specialization, it often comes at the cost of generalization.
+
+Table~\ref{tab:xnli_additional_results} extends the evaluation of fine-tuning configurations by including additional statistical interventions (P5, P10, P25, and P50) for Vietnamese (\textit{vi}), Hindi (\textit{hi}), and Urdu (\textit{ur}). These interventions focus on lower percentile activation values, complementing the prior analysis of higher percentile interventions.
+
+\begin{table}[ht]
+	\centering
+	\renewcommand{\arraystretch}{1.3}
+	\setlength{\tabcolsep}{4pt}
+	\begin{tabularx}{\textwidth}{|X|X|X|X|X|X|X|X|X|}
+		\hline
+		\textbf{Fine-tune Neurons} & \textbf{Eval Lang} & \textbf{No Int} & \textbf{Int by P5} & \textbf{Int by P10} & \textbf{Int by P25} & \textbf{Int by P50} \\
+		\hline
+		null & vi & 0.8053 & 0.7366 & 0.7773 & 0.8055 & 0.7971 \\
+		set1\_en & vi & 0.8017 & 0.7432 & 0.7803 & 0.8027 & 0.7923 \\
+		set1\_vi & vi & 0.8007 & 0.7426 & 0.7801 & 0.8029 & 0.7927 \\
+		set1\_en+vi & vi & 0.8009 & 0.7426 & 0.7805 & 0.8027 & 0.7919 \\
+		\hline
+		null & hi & 0.7501 & 0.7488 & 0.7518 & 0.7496 & 0.7526 \\
+		set1\_en & hi & 0.7476 & 0.7451 & 0.7468 & 0.7461 & 0.7451 \\
+		set6\_en & hi & 0.7491 & 0.7464 & 0.7456 & 0.7476 & 0.7468 \\
+		set6\_hi & hi & 0.7492 & 0.7461 & 0.7456 & 0.7464 & 0.7456 \\
+		set6\_en+hi & hi & 0.7488 & 0.7456 & 0.7468 & 0.7462 & 0.7454 \\
+		\hline
+		null & ur & 0.7002 & 0.6861 & 0.6873 & 0.6971 & 0.7054 \\
+		set6\_en & ur & 0.6984 & 0.6886 & 0.6904 & 0.7016 & 0.7031 \\
+		set6\_ur & ur & 0.6984 & 0.6873 & 0.6913 & 0.7011 & 0.7034 \\
+		set6\_en+ur & ur & 0.6992 & 0.6867 & 0.6893 & 0.7016 & 0.7042 \\
+		\hline
+	\end{tabularx}
+	\caption{XNLI task results (intervention by lower quantiles) after targeted neurons fine-tuning for LAPE method for Llama3.1. The training language is always English}
+	\label{tab:xnli_additional_results}
+\end{table}
+
+\textbf{Insights from Results of Intervention with Lower Quantiles}
+\begin{itemize}
+	\item \textbf{Low Percentile Interventions:} The impact of interventions at lower percentiles (P5, P10) varies significantly across languages. For instance, in \textit{vi}, there is a notable drop in performance with P5 (0.7366) but a recovery at P25 (0.8055), suggesting that activation suppression may initially disrupt but later stabilize.
+	\item \textbf{Comparison Across Languages:} In \textit{hi}, the effects of interventions are minimal, with performance remaining stable across percentiles. This indicates a higher resilience to neuron-level changes compared to \textit{vi} and \textit{ur}.
+	\item \textbf{Urdu-Specific Trends:} In \textit{ur}, P50 yields the best results (0.7054), highlighting that moderate percentile interventions may enhance generalization for certain low-resource languages.
+	\item \textbf{Fine-Tuning Configurations:} Targeting both English and target language neurons (e.g., \textit{set6\_en+ur}) continues to offer a balanced trade-off, with slight improvements in stability compared to single-language setups (e.g., \textit{set6\_ur}).
+\end{itemize}
+
+\subsection{Act Prob 90p Experiment Results using Lang Specific Neurons}
+
+Table~\ref{tab:xnli_results_act_prob_90p} summarizes the results of the XNLI task using the act\_prob\_90p method for fine-tuning. The results evaluate the impact of interventions at various statistical activation thresholds (\textit{Mean, P75, P90, P95}) for the evaluation languages \textit{vi}, \textit{hi}, and \textit{ur}. Different fine-tuning configurations are compared, including null (no targeted neurons fine-tuned), English-specific neurons, target language-specific neurons, and both English and target language neurons combined.
+
+\textbf{Insights from Results of Intervention with Higher Quantiles:}
+\begin{itemize}
+	\item \textbf{Vietnamese (\textit{vi}):} 
+	\begin{itemize}
+		\item The accuracy decreases slightly after interventions with lower quantiles (e.g., P75), but higher quantiles (e.g., P90 and P95) show marginal improvement, particularly in the null configuration.
+		\item The best performance is observed with no intervention (\textit{No Int}), indicating that targeted interventions may slightly disrupt the zero-shot transferability for \textit{vi}.
+		\item Fine-tuning with English and Vietnamese neurons (\textit{en+vi}) yields stable results, demonstrating the robustness of combining targeted neurons.
+	\end{itemize}
+	
+	\item \textbf{Hindi (\textit{hi}):}
+	\begin{itemize}
+		\item Accuracy consistently decreases as the quantile of activation increases. This trend highlights that interventions may inadvertently suppress generalizable linguistic features for \textit{hi}.
+		\item The null configuration (\textit{No Int}) provides the best results, reinforcing that interventions are not always beneficial, especially for languages with unique linguistic patterns.
+		\item The impact of targeted fine-tuning is relatively minimal, with results converging close to the baseline accuracy.
+	\end{itemize}
+	
+	\item \textbf{Urdu (\textit{ur}):}
+	\begin{itemize}
+		\item Results for \textit{ur} are relatively stable, with minor fluctuations across different configurations and intervention thresholds.
+		\item The highest accuracy is observed in the configuration with English neurons (\textit{en}) and interventions at the mean activation level.
+		\item Urdu's unique script and underrepresentation in training data may explain why targeted fine-tuning does not significantly improve results compared to zero-shot transfer.
+	\end{itemize}
+\end{itemize}
+
+These results highlight the nuanced impact of targeted fine-tuning on the XNLI task. While higher quantile interventions can improve robustness, they may also disrupt the generalization capability of the model, as seen in \textit{hi}. For \textit{vi}, the results suggest that linguistic similarity to the training language (\textit{en}) allows for better adaptation even with minimal fine-tuning. However, the relative stability of \textit{ur} results indicates that certain languages may require alternative strategies, such as increasing data representation during training or exploring script-specific adaptations.
+
+\begin{table}[ht]
+	\centering
+	\renewcommand{\arraystretch}{1.3}
+	\setlength{\tabcolsep}{4pt}
+	\begin{tabularx}{\textwidth}{|X|X|X|X|X|X|X|}
+		\hline
+		\textbf{Fine-tune Neurons} & \textbf{Eval Lang} & \textbf{No Int} & \textbf{Int by $\mu$} & \textbf{Int by P75} & \textbf{Int by P90} & \textbf{Int by P95} \\
+		\hline
+		null & vi & 0.8053 & 0.7821 & 0.7891 & 0.7931 & 0.7957 \\
+		en & vi & 0.8027 & 0.7801 & 0.7865 & 0.7907 & 0.7923 \\
+		vi & vi & 0.8005 & 0.7799 & 0.7857 & 0.7901 & 0.7907 \\
+		en+vi & vi & 0.8005 & 0.7799 & 0.7853 & 0.7897 & 0.7909 \\
+		\hline
+		null & hi & 0.7501 & 0.7411 & 0.7268 & 0.7186 & 0.7122 \\
+		en & hi & 0.7492 & 0.7386 & 0.7262 & 0.7214 & 0.7148 \\
+		hi & hi & 0.7486 & 0.7382 & 0.7262 & 0.7212 & 0.7148 \\
+		en+hi & hi & 0.7488 & 0.7372 & 0.7256 & 0.7214 & 0.7144 \\
+		\hline
+		null & ur & 0.7002 & 0.6971 & 0.6978 & 0.6932 & 0.6875 \\
+		en & ur & 0.6994 & 0.7006 & 0.6978 & 0.6937 & 0.6893 \\
+		ur & ur & 0.6988 & 0.7001 & 0.6982 & 0.6935 & 0.6925 \\
+		en+ur & ur & 0.6978 & 0.6992 & 0.6961 & 0.6927 & 0.6915 \\
+		\hline
+	\end{tabularx}
+	\caption{XNLI task results (intervention by higher quantiles) after targeted neurons fine-tuning for act\_prob\_90p method for Llama3.1. The training language is always English}
+	\label{tab:xnli_results_act_prob_90p}
+\end{table}
+
+Table~\ref{tab:xnli_results_lower_quantiles} summarizes the results of the XNLI task with interventions at lower quantiles (\textit{P5, P10, P25, P50}). The results evaluate the effect of these interventions on the evaluation languages \textit{vi}, \textit{hi}, and \textit{ur}. These configurations provide insights into how lower activation thresholds influence model performance.
+
+\textbf{Insights from Results of Intervention with Lower Quantiles:}
+\begin{itemize}
+	\item \textbf{Vietnamese (\textit{vi}):}
+	\begin{itemize}
+		\item Interventions across lower quantiles consistently improve performance, with the highest accuracy observed at \textit{P50}.
+		\item The improvements suggest that lower quantile interventions enable better activation tuning for \textit{vi}, potentially due to linguistic similarities with the training language (\textit{en}).
+	\end{itemize}
+	\item \textbf{Hindi (\textit{hi}):}
+	\begin{itemize}
+		\item Accuracy decreases steadily with higher quantiles, with \textit{P5} yielding the best results.
+		\item The trend indicates that interventions targeting lower activations may disrupt the encoded linguistic representations for \textit{hi}.
+	\end{itemize}
+	\item \textbf{Urdu (\textit{ur}):}
+	\begin{itemize}
+		\item Results for \textit{ur} are relatively stable, with minimal fluctuations across quantiles.
+		\item The highest accuracy is achieved with \textit{P50} interventions for some configurations, indicating that Urdu's unique characteristics may benefit from tuning at broader activation thresholds.
+	\end{itemize}
+\end{itemize}
+
+\begin{table}[ht]
+	\centering
+	\renewcommand{\arraystretch}{1.3}
+	\setlength{\tabcolsep}{4pt}
+	\begin{tabularx}{\textwidth}{|X|X|X|X|X|X|X|}
+		\hline
+		\textbf{Fine-tune Neurons} & \textbf{Eval Lang} & \textbf{Int by P5} & \textbf{Int by P10} & \textbf{Int by P25} & \textbf{Int by P50} \\
+		\hline
+		null & vi & 0.7653 & 0.7747 & 0.7801 & 0.7835 \\
+		en & vi & 0.7667 & 0.7749 & 0.7789 & 0.7827 \\
+		vi & vi & 0.7653 & 0.7743 & 0.7779 & 0.7817 \\
+		en+vi & vi & 0.7663 & 0.7745 & 0.7795 & 0.7805 \\
+		\hline
+		null & hi & 0.7501 & 0.7468 & 0.7422 & 0.7378 \\
+		en & hi & 0.7481 & 0.7451 & 0.7426 & 0.7378 \\
+		hi & hi & 0.7486 & 0.7456 & 0.7416 & 0.7374 \\
+		en+hi & hi & 0.7491 & 0.7462 & 0.7428 & 0.7364 \\
+		\hline
+		null & ur & 0.6948 & 0.6958 & 0.6954 & 0.6966 \\
+		en & ur & 0.6948 & 0.6946 & 0.6956 & 0.7001 \\
+		ur & ur & 0.6946 & 0.6952 & 0.6952 & 0.6998 \\
+		en+ur & ur & 0.6942 & 0.6964 & 0.6948 & 0.6998 \\
+		\hline
+	\end{tabularx}
+	\caption{XNLI task results (intervention by lower quantiles) after targeted neurons fine-tuning for act\_prob\_90p method for Llama3.1. The training language is always English}
+	\label{tab:xnli_results_lower_quantiles}
+\end{table}
+
+\subsection{Act Prob 90p Experiment Results using Task Specific Neurons}
+
+This section presents the experimental results of the Act Prob 90p method using task-specific neurons computed from the XNLI dataset. The experiments were conducted to evaluate the effect of targeted neuron interventions on fine-tuning performance. The evaluations were performed using Vietnamese (\textit{vi}) as the target language. The results are summarized in Table \ref{tab:task_specific_results_90p}.
+
+\begin{table}[ht]
+	\centering
+	\renewcommand{\arraystretch}{1.3}
+	\setlength{\tabcolsep}{4pt}
+	\begin{tabularx}{\textwidth}{|X|X|X|X|X|X|X|}
+		\hline
+		\textbf{Fine-Tune XNLI Neurons} & \textbf{Eval Lang} & \textbf{No Int} & \textbf{Int by $\mu$} & \textbf{Int by P75} & \textbf{Int by P90} & \textbf{Int by P95} \\
+		\hline
+		null & vi & 0.8053 & 0.7926 & 0.7994 & 0.8014 & 0.8028 \\
+		en & vi & 0.7956 & 0.7926 & 0.8004 & 0.8006 & 0.8026 \\
+		vi & vi & 0.7951 & 0.7926 & 0.7998 & 0.7998 & 0.8014 \\
+		en+vi & vi & 0.7921 & 0.7924 & 0.7982 & 0.7921 & 0.8012 \\
+		\hline
+	\end{tabularx}
+	\caption{XNLI task results (intervention by higher quantiles) for Act Prob 90p experiments using task-specific neurons for Llama3.1. The training language is always English}
+	\label{tab:task_specific_results_90p}
+\end{table}
+
+\textbf{Key Insights of Intervention with Higher Quantiles:}
+\begin{itemize}
+	\item The highest accuracy (0.8053) was observed in the null configuration without intervention, suggesting that task-specific neurons retain considerable generalization capacity in zero-shot transfer settings.
+	\item Interventions using higher quantiles (P90, P95) generally resulted in the most significant recovery or improvement in performance across configurations.
+	\item Fine-tuning task neurons from the evaluation language (\textit{vi}) provided competitive results, indicating that task-specific activations effectively capture task-relevant features.
+	\item The combined fine-tuning configuration (\textit{en+vi}) exhibited the lowest baseline accuracy, highlighting potential conflicts between task-specific neuron activations of different languages.
+\end{itemize}
+
+Table \ref{tab:task_specific_results_p5_p50} provides additional experimental results for the Act Prob 90p method using task-specific neurons with interventions applied at lower quantiles (P5 to P50). The evaluations were performed on the Vietnamese (\textit{vi}) target language under different fine-tuning configurations.
+
+\begin{table}[ht]
+	\centering
+	\renewcommand{\arraystretch}{1.3}
+	\setlength{\tabcolsep}{4pt}
+	\begin{tabularx}{\textwidth}{|X|X|X|X|X|X|X|}
+		\hline
+		\textbf{Fine-Tune XNLI Neurons} & \textbf{Eval Lang} & \textbf{Int by P5} & \textbf{Int by P10} & \textbf{Int by P25} & \textbf{Int by P50} \\
+		\hline
+		null & vi & 0.7706 & 0.7801 & 0.7912 & 0.7936 \\
+		en & vi & 0.7702 & 0.7791 & 0.7896 & 0.7926 \\
+		vi & vi & 0.7688 & 0.7774 & 0.7896 & 0.7931 \\
+		\hline
+	\end{tabularx}
+	\caption{XNLI task results (intervention by lower quantiles) for Act Prob 90p experiments using task-specific neurons for Llama3.1. The training language is always English}
+	\label{tab:task_specific_results_p5_p50}
+\end{table}
+
+\textbf{Key Insights of Intervention with Lower Quantiles:}
+\begin{itemize}
+	\item Performance consistently improves as the intervention quantile increases from P5 to P50, demonstrating the effectiveness of higher quantile activations in enhancing accuracy.
+	\item The null configuration achieves the highest accuracy at P50 (0.7936), indicating that task-specific neurons alone provide a robust representation for zero-shot transfer scenarios.
+	\item Fine-tuning on English neurons (\textit{en}) and Vietnamese neurons (\textit{vi}) exhibits competitive performance, but the gains are marginal compared to the null configuration, highlighting the strong baseline capability of task-specific neurons.
+\end{itemize}
+
+
+
 
 
 

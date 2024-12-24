@@ -116,9 +116,23 @@ This strategy allows the model to simultaneously adapt to English and Vietnamese
 \end{equation}
 where \(\mathcal{M}_\text{setup}\) refers to the model fine-tuned using one of the experimental setups. These improvements are compared against the baselines to evaluate the efficacy of the targeted neuron fine-tuning strategies.
 
+\section{Targeted Neuron Fine-Tuning Configurations}
 
+\textbf{Training Overview:} The training of the XNLI task was conducted using the LoRA-based fine-tuning strategy, leveraging the \texttt{Llama3.1} model. The experimental setup includes both English and multilingual datasets, with targeted interventions in language-specific neurons. The primary objective was to fine-tune the model while freezing specific subsets of neurons based on language-specific activations. 
 
+\textbf{Model and Quantization:} The \texttt{Llama3} model was employed with 4-bit quantization, utilizing the \texttt{nf4} quantization type for memory efficiency. The compute precision for quantization was set to \texttt{bfloat16} with double quantization enabled. This configuration ensures minimal computational overhead without compromising the model's performance.
 
+\textbf{Dataset:} 
+The dataset used for training and evaluation was the \textbf{XNLI Dataset}. The dataset was tokenized using the pre-trained tokenizer corresponding to the \texttt{Llama3} model, with a maximum context length of 512 tokens. The training dataset utilized 25\% of the available data, while 10\% was reserved for evaluation. 
+
+\textbf{Training Hyperparameters:}
+\begin{itemize}
+	\item \textbf{Epochs:} Training was conducted for a single epoch, divided into steps calculated based on the batch size and dataset size.
+	\item \textbf{Batch Size:} A batch size of 8 was used for both training and evaluation, with gradient accumulation steps set to 1.
+	\item \textbf{Learning Rate:} The initial learning rate was set to \(1 \times 10^{-5}\), with a linear warm-up scheduler for the first 1\% of steps.
+	\item \textbf{Optimization:} The optimizer used was AdamW with \(\beta_1 = 0.95\), \(\beta_2 = 0.999\), weight decay of 0.1, and a gradient clipping norm of 10.0.
+	\item \textbf{LoRA Configuration:} The LoRA rank was set to 8, and the scaling factor (\(\alpha\)) was set to 16.
+\end{itemize}
 
 
 

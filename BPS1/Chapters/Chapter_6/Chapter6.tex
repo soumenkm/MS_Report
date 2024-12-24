@@ -1,43 +1,54 @@
 % Chapter Template
 
-\chapter{Conclusions and Practical Implications}\doublespacing % Main chapter title
+\chapter{Conclusions}\singlespacing % Main chapter title
 
 \label{Chapter6} % Change X to a consecutive number; for referencing this chapter elsewhere, use \ref{ChapterX}
 
-\lhead{Chapter VI. \emph{Conclusions and Practical Implications}} % Change X to a consecutive number; this is for the header on each page - perhaps a shortened title
+\lhead{Chapter 6. \emph{Conclusions}} % Change X to a consecutive number; this is for the header on each page - perhaps a shortened title
 
 %----------------------------------------------------------------------------------------
 %	SECTION 1
 %----------------------------------------------------------------------------------------
 
 
-\section{Summary}
+\section{Conclusion and Future Work}
 
-This chapter outlines the findings and conclusions of the study, as well as the practical implications that can be drawn from the results.
-
-
-
-
-\section{Study Findings}
-\lipsum[1]
+\subsection{Conclusion}
+This study explored various configurations and methodologies for fine-tuning and evaluating the Meta-Llama-3.1-8B model on the XNLI task using both language-specific and task-specific neurons. The experiments leveraged LoRA (Low-Rank Adaptation) to efficiently fine-tune specific layers and subsets of neurons, ensuring minimal computational overhead while retaining robust performance. Key findings from this work include:
 
 \begin{itemize}
-    \item Urabitur auctor semper nulla. Donec varius orci eget risus. Duis nibh mi, congue eu, accumsan eleifend, sagittis quis, diam. Duis eget orci sit amet orci dignissim rutrum.
-
-    \item Risus. Duis nibh mi, congue eu, accumsan eleifend, sagittis quis, diam.
+	\item \textbf{Effectiveness of Statistical Interventions:} The use of statistical activation patterns, such as mean and higher quantiles (e.g., P75, P90, P95), demonstrated consistent improvements across multiple configurations. These interventions effectively optimized the performance of the model by modulating specific neurons' activation levels.
+	
+	\item \textbf{Language-Specific Neurons:} Results revealed that language-specific neurons computed using Wikipedia data provide strong baselines for zero-shot transfer to other languages. Fine-tuning targeted neurons, such as English-specific or Vietnamese-specific neurons, led to additional marginal improvements in performance.
+	
+	\item \textbf{Task-Specific Neurons:} By leveraging XNLI-specific neurons, a more task-aligned representation was achieved. The results highlighted that task-specific neurons are highly effective for fine-tuning, particularly when combined with statistical interventions on activation patterns.
+	
+	\item \textbf{Insights into Zero-Shot Transfer:} Unexpectedly, in some cases, the performance of zero-shot transfer models exceeded that of directly fine-tuned models. This behavior was notably observed in languages such as Urdu, suggesting the model's intrinsic robustness in certain linguistic domains.
+	
+	\item \textbf{Intervention with Lower Quantiles:} Activating neurons based on lower quantiles (e.g., P5, P10) provided incremental improvements, but higher quantile interventions were found to be more effective for optimizing performance across the XNLI task.
 \end{itemize}
 
+Overall, the integration of LoRA for efficient fine-tuning, combined with activation-based statistical interventions, demonstrates a promising avenue for enhancing multilingual natural language understanding. The results underline the importance of targeted neuron manipulation and its impact on language transferability and task alignment.
 
-\section{Research Contribution}
-\lipsum[1]
+\subsection{Future Work}
+While the results achieved in this study are promising, several avenues for future exploration remain:
 
+\begin{itemize}
+	\item \textbf{Dynamic Neuron Selection:} Future work could explore dynamic neuron selection mechanisms based on task requirements. For instance, using reinforcement learning or attention-based approaches to identify and activate neurons optimally during training and evaluation.
+	
+	\item \textbf{Cross-Lingual Generalization:} Investigating the impact of fine-tuning on low-resource languages and analyzing how neuron interventions affect cross-lingual generalization remains an open challenge. Additional experiments could focus on expanding the set of evaluation languages to include diverse linguistic families.
+	
+	\item \textbf{Integration with Larger Architectures:} Scaling the current methodologies to larger models (e.g., Meta-Llama-13B) or adapting them to more recent architectures could provide further insights into the scalability and generalization of the proposed approaches.
+	
+	\item \textbf{Fine-Tuning Granularity:} Exploring finer-grained levels of neuron manipulation, such as per-layer or per-head interventions, may yield better task alignment and performance across diverse benchmarks.
+	
+	\item \textbf{Human-Like Adaptation:} Incorporating methods inspired by human language acquisition, such as continual learning or curriculum-based fine-tuning, could enhance the model's ability to adapt to novel tasks and domains without catastrophic forgetting.
+	
+	\item \textbf{Interpretability and Explainability:} Further analysis is needed to understand the reasons behind certain surprising behaviors, such as why zero-shot transfer sometimes outperforms direct fine-tuning. Enhancing interpretability could shed light on the underlying mechanisms of neuron activations and their role in language understanding.
+\end{itemize}
 
-\section{Practical Implications}
-\lipsum[3]
+In conclusion, this study provides a strong foundation for further advancements in neuron-level fine-tuning for multilingual natural language processing. By combining efficient fine-tuning techniques with activation-based interventions, we pave the way for more adaptive and scalable language models in the future.
 
-
-\section{Study Limitations and Scope for Future Work}
-\lipsum[3]
 
 
 

@@ -3,7 +3,8 @@
 \usepackage{wrapfig}
 \usepackage{lscape}
 \usepackage{rotating}
-\usepackage{graphicx}
+%\usepackage{subcaption}
+\usepackage[]{graphicx}
 \usepackage{caption}
 \usepackage{amsmath, nccmath}
 \usepackage{comment}
@@ -18,7 +19,6 @@
 % \usepackage{subfig}
 \usepackage{makecell}
 \usepackage{booktabs}
-\usepackage{multirow}
 \usepackage{lscape}
 \usepackage{longtable}
 \usepackage{placeins}
@@ -30,7 +30,7 @@
 \usepackage{enumitem} % for roman letter lists
 \usepackage{setspace}
 \usepackage{hyperref}
-% \usepackage{subfig}
+\usepackage{tabularx}
 \newcommand\myemptypage{
     \null
     \thispagestyle{empty}
@@ -405,23 +405,23 @@ The study further analyzes perplexity distributions and neuron activation maps a
 %	ABBREVIATIONS
 %----------------------------------------------------------------------------------------
 
-\clearpage % Start a new page
-
-\setstretch{1.25} % Set the line spacing to 1.5, this makes the following tables easier to read
-
-\lhead{\emph{Abbreviations}} % Set the left side page header to "Abbreviations"
-\listofsymbols{ll} % Include a list of Abbreviations (a table of two columns)
-{
-
-% \textbf{SM} & \textbf{S}afety \textbf{M}argin\\
-
-
-
-\textbf{AFT}  & \textbf{A}ccelerated  \textbf{F}ailure  \textbf{T}ime \\
-\textbf{ANOVA}  & \textbf{A}nalysis  \textbf{}of  \textbf{V}ariance\\
-\textbf{BLR}  & \textbf{B}inary \textbf{L}ogistic \textbf{R}egression\\
-
-}
+%\clearpage % Start a new page
+%
+%\setstretch{1.25} % Set the line spacing to 1.5, this makes the following tables easier to read
+%
+%\lhead{\emph{Abbreviations}} % Set the left side page header to "Abbreviations"
+%\listofsymbols{ll} % Include a list of Abbreviations (a table of two columns)
+%{
+%
+%% \textbf{SM} & \textbf{S}afety \textbf{M}argin\\
+%
+%
+%
+%\textbf{AFT}  & \textbf{A}ccelerated  \textbf{F}ailure  \textbf{T}ime \\
+%\textbf{ANOVA}  & \textbf{A}nalysis  \textbf{}of  \textbf{V}ariance\\
+%\textbf{BLR}  & \textbf{B}inary \textbf{L}ogistic \textbf{R}egression\\
+%
+%}
 
 %----------------------------------------------------------------------------------------
 
@@ -431,16 +431,16 @@ The study further analyzes perplexity distributions and neuron activation maps a
 
 \clearpage % Start a new page
 
-\lhead{\emph{Symbols}} % Set the left side page header to "Symbols"
-
-\listofnomenclature{lll} % Include a list of Symbols (a two column table)
-{
-$\mu$ & Location parameter  \\
-$\lambda$ & Scale parameter  \\
-$\beta_0$ & Null model parameter  \\
-$\hat{\beta}$ & Fitted parameter  \\
-
-}
+%\lhead{\emph{Symbols}} % Set the left side page header to "Symbols"
+%
+%\listofnomenclature{lll} % Include a list of Symbols (a two column table)
+%{
+%$\mu$ & Location parameter  \\
+%$\lambda$ & Scale parameter  \\
+%$\beta_0$ & Null model parameter  \\
+%$\hat{\beta}$ & Fitted parameter  \\
+%
+%}
 
 
 
@@ -474,17 +474,17 @@ $\hat{\beta}$ & Fitted parameter  \\
 
 \addtocontents{toc}{\vspace{2em}} % Add a gap in the Contents, for aesthetics
 
-\appendix % Cue to tell LaTeX that the following 'chapters' are Appendices
+%\appendix % Cue to tell LaTeX that the following 'chapters' are Appendices
 
 % Include the appendices of the thesis as separate files from the Appendices folder
 % Uncomment the lines as you write the Appendices
 
-\input{Appendices/AppendixA}
-\input{Appendices/AppendixB}
+%\input{Appendices/AppendixA}
+%\input{Appendices/AppendixB}
 % \input{Appendices/AppendixC}
 %\input{Appendices/AppendixD}
 
-\addtocontents{toc}{\vspace{2em}} % Add a gap in the Contents, for aesthetics
+%\addtocontents{toc}{\vspace{2em}} % Add a gap in the Contents, for aesthetics
 
 \backmatter
 
@@ -503,10 +503,10 @@ $\hat{\beta}$ & Fitted parameter  \\
 
 \bibliography{references} % The references (bibliography) information are stored in the file named "Bibliography.bib"
 
-\newpage
-\include{LOP}
-\newpage
-\include{Biography}
+%\newpage
+%\include{LOP}
+%\newpage
+%\include{Biography}
 
 
 \end{document}  

@@ -138,12 +138,16 @@ The top $m$ neurons with the lowest LAPE values are selected for language-specif
 \begin{equation}
 	m = \frac{0.01 \times 4d \times L}{100}.
 \end{equation}
+The top \(m\) neurons are identified by sorting the LAPE values and selecting the indices of the \(m\) smallest values:
+\begin{equation}
+	\text{Top}_m(\text{Lang\_Set}) = \text{argsort\_ascending}_m \left\{\text{LAPE}(i,j) \,|\, \forall i, j, \exists l \,\, s.t. \,\,  p_{i,j}^l > \text{Threshold} \right\}.
+\end{equation}
 This ensures that only the most language-specific neurons are retained for further interpretation. 
 
 \textbf{Step 6: Identify Language-Specific Neuron Sets.} 
 For each neuron $(i, j)$ in the selected set, the language-specific set is defined as:
 \begin{equation}
-	\text{Lang\_Spec\_Set}(i, j) = \left\{ l \, | \, P_{i,j}^l > \text{Threshold} \right\}.
+	\text{Lang\_Spec\_Set}(i, j) = \left\{ l \, | \, p_{i,j}^l > \text{Threshold}, (i,j) \in \text{Lang\_Set} \right\}.
 \end{equation}
 
 A neuron is considered specific to a subset of languages if:

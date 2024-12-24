@@ -62,7 +62,7 @@ fill=blue!30]
 		\node[align=center] (yd) at (14,14.5) {Valid Act Prob Dist \\ $\sum_{l=1}^{k} {}^{l}P^{i}_{j} = 1$ \\ $\forall i \in \{1, 2, \dots, L\}$ \\ $\forall j \in \{1, 2, \dots, 4d\}$};
 		\node (yk) at (14,12.5) {$^{k}P^{i}_{j} \in \mathbb{R}^+$};
 		
-		\node[align=center] (lape) at (10,12.5) {Lang Act Prob Entropy \\ $LAPE(i, j) := \sum_{l=1}^{k} {}^{l}P^{i}_{j} \cdot \log {}^{l}P^{i}_{j}$ \\ $\forall i \in \{1, 2, \dots, L\}$ \\ $\forall j \in \{1, 2, \dots, 4d\}$};
+		\node[align=center] (lape) at (10,12.5) {Lang Act Prob Entropy \\ $LAPE(i, j) := - \sum_{l=1}^{k} {}^{l}P^{i}_{j} \cdot \log {}^{l}P^{i}_{j}$ \\ $\forall i \in \{1, 2, \dots, L\}$ \\ $\forall j \in \{1, 2, \dots, 4d\}$};
 		
 		\draw[arrow] (h1) -- (p1);
 		\draw[arrow] (h2) -- (p2);

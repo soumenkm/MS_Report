@@ -64,9 +64,9 @@ where $h_{i,j}^t$ is the neuron activation corresponding to the $t^\text{th}$ to
 \textbf{Language-Specific Activations:}
 For each language $l$ in the dataset, we compute the average activation of each neuron $(i, j)$ over all sequences $S_l$ in the dataset:
 \begin{equation}
-H_{i,j}^l = \frac{1}{|S_l|} \sum_{s \in S_l} \bar{h}_{i,j}^{(s)},
+h_{i,j}^l = \frac{1}{|S_l|} \sum_{s \in S_l} \bar{h}_{i,j}^{(s)},
 \end{equation}
-where $H_{i,j}^l$ represents the average activation of the $j^\text{th}$ neuron in the $i^\text{th}$ layer for language $l$, and $|S_l|$ denotes the number of sequences for language $l$.
+where $h_{i,j}^l$ represents the average activation of the $j^\text{th}$ neuron in the $i^\text{th}$ layer for language $l$, and $|S_l|$ denotes the number of sequences for language $l$.
 
 
 \section{Statistics of Neuron Activation}

@@ -8,3 +8,8 @@
 *.gz
 *.toc
 *.pkl
+*.DS_Store
+*.nav
+*.xml
+*.toc
+

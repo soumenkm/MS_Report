@@ -58,7 +58,7 @@
 					\begin{equation}
 						\mathbf{h}^i = [ \text{act\_fn}(\hat{\mathbf{H}}^i \mathbf{W}_1^i) \otimes (\hat{\mathbf{H}}^i \mathbf{W}_3^i) ] \cdot \mathbf{W}_2^i,
 					\end{equation}
-					\item The average activation (against Wikipedia sentence) of a neuron $(i, j)$ across token positions is computed as:
+					\item The average activation (against \citeauthor{wikidump} sentence) of a neuron $(i, j)$ across token positions is computed as:
 					\begin{equation}
 						\bar{h}_{i,j} = \frac{1}{T} \sum_{t=1}^{T} h_{i,j}^t.
 					\end{equation}
@@ -70,7 +70,7 @@
 				\end{itemize}		  
 			\end{block}
 			\column{0.4\textwidth}
-			\begin{block}{\scriptsize MLP Architecture of Llama Model}
+			\begin{block}{\scriptsize MLP Architecture of Llama3 [\citeauthor{grattafiori2024llama} et al.]}
 				\begin{figure}
 					\centering
 					\includegraphics[width=\textwidth]{Chapters/Chapter_3/mlp.pdf}
@@ -83,7 +83,7 @@
 \begin{frame}{Methodology: LAPE}
 	\begin{columns}
 	\column{0.55\textwidth}
-	\begin{block}{\scriptsize LAPE Neurons (Tang et. al., 2024)}\scriptsize
+	\begin{block}{\scriptsize LAPE Neurons [\citeauthor{tang2024languagespecific}]}\scriptsize
 		\begin{itemize}
 			\item To identify neurons with significant language-specific behavior, a threshold (for Wikipedia dataset) is defined as:
 			\begin{equation}
@@ -96,10 +96,10 @@
 			
 			\item Only 1\% ($m = 0.01 \times 4d \times L$) of neurons with lowest LAPE values are selected for as language neurons.
 			\begin{equation}
-				LN = \text{argsort}_m \left\{\text{LAPE}(i,j) \,|\, \forall i, j, \exists l \,\, s.t. \,\,  p_{i,j}^l > \tau \right\}
+				LNS = \text{argsort}_m \left\{\text{LAPE}(i,j) \,|\, \forall i, j, \exists l \,\, s.t. \,\,  p_{i,j}^l > \tau \right\}
 			\end{equation}
 			\begin{equation}
-				LSN(i, j) = \left\{ l \, | \, p_{i,j}^l > \tau \land (i,j) \in LN \right\}
+				NTL(i, j) = \left\{ l \, | \, p_{i,j}^l > \tau \land (i,j) \in LNS \right\}
 			\end{equation}
 		\end{itemize}		  
 	\end{block}
@@ -141,7 +141,7 @@
 					 m = \frac{0.125 \times L \times 4d}{100}
 				\end{equation}
 				\begin{equation}
-					N^l = \text{argsort\_desc}_m \left\{r_{i,j}^l \, | \, \forall i, j\right\}
+					LTN(l) = \text{argsort\_desc}_m \left\{r_{i,j}^l \, | \, \forall i, j\right\}
 				\end{equation}
 				\item This process ensures that neurons with the highest language-specific relevance are identified for each language.
 			\end{itemize}
@@ -155,7 +155,7 @@
 		\column{0.55\textwidth}
 		\begin{block}{\scriptsize LoRA Fine-Tuning for a Task}\scriptsize
 			\begin{itemize}
-				\item \textbf{LoRA Mechanism:} Fine-tunes a subset of parameters in neural networks by introducing a low-rank decomposition:
+				\item \textbf{LoRA Mechanism:} Fine-tunes a subset of parameters in MLP by low-rank decomposition [\citeauthor{lora}]:
 				\begin{equation}
 					[\text{masked\_A}]_{ij} = 1, \forall i \in \{1, \dots, d\}, \, \forall j \in \{1, \dots, r\}
 				\end{equation}
@@ -189,7 +189,7 @@
 		\column{0.45\textwidth}
 		\begin{block}{\scriptsize Task and Dataset: XNLI}\scriptsize
 			\begin{itemize}
-				\item \textbf{XNLI Task:} Multilingual natural language inference task to classify relationships between premise and hypothesis into \textit{entailment}, \textit{neutral}, or \textit{contradiction}.
+				\item \textbf{XNLI Task:} Multilingual natural language inference task to classify relationships between premise and hypothesis into \textit{entailment}, \textit{neutral}, or \textit{contradiction} [\citeauthor{xnli}].
 				\item \textbf{Dataset:} Sentence pairs annotated across 15 languages. Focused on English (\textit{en}) as source language and Vietnamese (\textit{vi}), Hindi (\textit{hi}), and Urdu (\textit{ur}) as target languages.
 				\item For the experiments, a fraction \(\mathcal{F}\) is used to train the model as $|\mathcal{D}_l^\text{train}| = 400K$.
 				\begin{equation}
@@ -227,7 +227,7 @@
 				\end{itemize}
 				\item \textbf{Target Metric:}
 				\begin{equation}
-					\Delta_\text{ZS} = \text{Acc}(\mathcal{M}_\text{experiment}) - \text{Acc}(\mathcal{M}_\text{en})
+					\Delta_\text{ZS} = \text{Accuracy}(\mathcal{M}_\text{experiment}) - \text{Accuracy}(\mathcal{M}_\text{en})
 				\end{equation}
 				\item Maximize \(\Delta_\text{ZS}\) to close the performance gap between zero-shot and direct fine-tuning.
 				
@@ -246,231 +246,339 @@
 	\end{columns}
 \end{frame}
 
+\begin{frame}{Experiments: Neuron Distribution and Intervention}
+	\begin{columns}
+		\column{0.55\textwidth}
+		\begin{block}{\scriptsize Language Neuron Distribution}\scriptsize
+			\begin{itemize}
+				\item The number of language-specific neurons for a language $l$ is computed as:
+				\begin{equation}
+					N^l = \sum_{i=1}^{L} \sum_{j=1}^{4d} \mathbb{I}\left(p_{i,j}^l > \tau \land (i,j) \in LNS \right)
+				\end{equation}
+				\item Neuron overlap between two languages $l_1$ and $l_2$ is given by:
+				\begin{equation}
+					O_{l_1, l_2} = \sum_{i=1}^{L} \sum_{j=1}^{4d} \mathbb{I}\left(p_{i,j}^{l_1} > \tau \land p_{i,j}^{l_2} > \tau \land (i,j) \in LNS \right)
+				\end{equation}
+				\item Layer-wise neuron distribution for a language $l$ is calculated:
+				\begin{equation}
+					L_l(i) = \sum_{j=1}^{4d} \mathbb{I}\left(p_{i,j}^l > \tau \land (i,j) \in LNS \right)
+				\end{equation}
+			\end{itemize}		  
+		\end{block}
+		\column{0.4\textwidth}
+		\begin{block}{\scriptsize Perplexity Change}\scriptsize
+			\begin{itemize}
+				\item Perplexity measures the uncertainty of a model's predictions, defined as:
+				\begin{equation}
+					\text{PPX}(\mathbf{x}) = \exp\left(-\frac{1}{T} \sum_{t=1}^T \log P(x_t \,|\, x_{<t})\right)
+				\end{equation}
+				\item Perplexity change ($\text{PPXC}(i,j)$) quantifies the impact of interventions at language $i$ on language $j$:
+				\begin{equation}
+				\begin{aligned}
+					\text{PPXC}(i,j) &= \text{PPX}(j \,|\, \text{Intervention at } i) \\
+					&- \text{PPX}(j \,|\, \text{No Intervention at } i)
+				\end{aligned}
+			\end{equation}
+			\end{itemize}
+		\end{block}
+	\end{columns}
+\end{frame}
 
+\begin{frame}{Results: Language Neuron Distribution for LAPE }
+	\begin{block}{}\scriptsize
+	  \begin{figure}[ht]
+	  	\centering
+	  	\begin{tabular}{cc}
+	  		\includegraphics[width=0.3\textwidth]{Chapters/Chapter_5/lang_neurons/Meta-Llama-3.1-8B/lape/set1/lang_neuron_dist.png} &
+	  		\includegraphics[width=0.3\textwidth]{Chapters/Chapter_5/lang_neurons/Meta-Llama-3.1-8B/lape/set3/lang_neuron_dist.png}
+	  	\end{tabular}
+	  \end{figure}
+	\end{block}
+\end{frame}
 
+\begin{frame}{Results: Language Neuron Overlap for LAPE }
+	\begin{block}{}\scriptsize
+		\begin{figure}[ht]
+			\centering
+			\begin{tabular}{cc}
+				\includegraphics[width=0.425\textwidth]{Chapters/Chapter_5/lang_neurons/Meta-Llama-3.1-8B/lape/set1/lang_neurons_overlap.png} &
+				\includegraphics[width=0.425\textwidth]{Chapters/Chapter_5/lang_neurons/Meta-Llama-3.1-8B/lape/set3/lang_neurons_overlap.png}
+			\end{tabular}
+		\end{figure}
+	\end{block}
+\end{frame}
 
+\begin{frame}{Results: Layer-wise Neuron Distribution for LAPE }
+	\begin{block}{}\scriptsize
+		\begin{figure}[ht]
+			\centering
+			\begin{tabular}{cc}
+				\includegraphics[width=0.3\textwidth]{Chapters/Chapter_5/lang_neurons/Meta-Llama-3.1-8B/lape/set1/layerwise_lang_neurons_dist.png} &
+				\includegraphics[width=0.3\textwidth]{Chapters/Chapter_5/lang_neurons/Meta-Llama-3.1-8B/lape/set3/layerwise_lang_neurons_dist.png}
+			\end{tabular}
+		\end{figure}
+	\end{block}
+\end{frame}
 
-
+\begin{frame}{Results: Perplexity Change for LAPE }
+	\begin{block}{}\scriptsize
+		\begin{figure}[ht]
+			\centering
+			\begin{tabular}{cc}
+				\includegraphics[width=0.425\textwidth]{Chapters/Chapter_5/perplexity/Meta-Llama-3.1-8B/set1/ppx_change.png} &
+				\includegraphics[width=0.425\textwidth]{Chapters/Chapter_5/perplexity/Meta-Llama-3.1-8B/set3/ppx_change.png}
+			\end{tabular}
+		\end{figure}
+	\end{block}
+\end{frame}
 	
-%	\begin{frame}{Language Model Fine Tuning: MAD-X}
-%		\begin{columns}
-%			\column{0.35\textwidth}
-%			\begin{block}{\scriptsize Overview of MAD-X}\scriptsize
-%				\begin{itemize}
-%					\item Language adapters are designed to adapt the model to the specificities of a given language. These adapters are trained using MLM on unlabelled data from the target language. 
-%					\item Task adapters are used to fine-tune the model for a specific task. They are applied after the language adapters
-%					\item The success of transfer learning heavily relies on the quality and comprehensiveness of the source language models.
-%				\end{itemize}		  
-%			\end{block}
-%			\column{0.55\textwidth}
-%			\begin{block}{\scriptsize MAD-X Architecture\footnotemark}
-%				\begin{figure}
-%					\centering
-%					\includegraphics[width=\textwidth]{lang-task-adapter}
-%				\end{figure}
-%			\end{block}
-%		\end{columns}\footcitetext{pfeiffer2020mad}
-%	\end{frame}
-%	
-%	\begin{frame}{Language Model Fine Tuning: Composable SFT}
-%		\begin{block}{\scriptsize Overview of Composable SFT}\scriptsize
-%			\begin{itemize}
-%				\item Composable SFT selects a subset of parameters that exhibit significant changes during initial training and fine-tune only these parameters in subsequent phases as per the LTH.
-%				\item  Initially, the full model parameters $\theta^{(0)}$ are trained on target data, resulting in updated parameters $\theta^{(1)}$. 
-%				\item Parameters are reset to their original values $\theta^{(0)}$ and only those marked by $\mu$ (top $K$ based on absolute change) are updated in the subsequent training.
-%			\end{itemize}		  
-%		\end{block}
-%		\begin{columns}
-%			\column{0.35\textwidth}
-%			\begin{block}{\scriptsize Equations of SFT}\scriptsize
-%				The sparse fine-tuning can be represented as $ \phi = \theta^{(2)} - \theta^{(0)}$. Where $\theta^{(2)}$ are the parameters after sparse fine-tuning. The adaptation for a language and task can then be expressed as a function of the base model $F(\cdot; \theta + \phi_L + \phi_T)$.
-%			\end{block}
-%			\column{0.6\textwidth}
-%			\begin{block}{\scriptsize Composable SFT Process\footnotemark}
-%				\begin{figure}
-%					\centering
-%					\includegraphics[width=\textwidth]{composable-sft}
-%				\end{figure}
-%			\end{block}
-%		\end{columns}\footcitetext{ansell2023composable}
-%	\end{frame}
-%	
-%	\begin{frame}{Fact Representation: Model Editing}
-%		\begin{block}{\scriptsize Overview of Task vectors}\scriptsize
-%			\begin{itemize}
-%				\item A task vector \( \tau_t \) is a vector that captures the changes made to a pre-trained model's weights when it is fine-tuned to perform a specific task ($\tau_t = \theta^t_{ft} - \theta_{pre}$)
-%				\item This vector \( \tau_t \) can be used to adjust the model weights of another pre-trained model of the same architecture to improve its performance on task \( t \), or combined with other task vectors or adjust the model's behavior such as unlearning a task.
-%				\item Task vectors involve element-wise operations on model weights, which assume a uniform structure across different model instances which could be a limitation.
-%			\end{itemize}
-%		\end{block}
-%		\begin{block}{\scriptsize Task Vectors in Model Editing\footnotemark}
-%			\begin{figure}
-%				\centering
-%				\includegraphics[width=0.75\textwidth]{task-vector}
-%			\end{figure}
-%		\end{block}\footcitetext{ilharco2023editing}
-%	\end{frame}
-%	
-%	\begin{frame}{Fact Representation: Cross Lingual}
-%		\begin{columns}
-%			\column{0.45\textwidth}
-%			\begin{block}{\scriptsize Overview of Fact Representation}\scriptsize
-%				\begin{itemize}
-%					\item \textbf{Language-Independent:} Each language has a unique set of neurons responsible for the representation of facts, independent of other languages.
-%					
-%					\item \textbf{Cross-Lingual Shared:} ML-LMs use the same set of neurons to represent the same facts across multiple languages. 
-%					
-%					\item \textbf{Cross-Lingual Transferred:} This representation type involves transferring factual knowledge from one language to others, typically from a high-resource language to low-resource languages.
-%				\end{itemize}
-%			\end{block}
-%			\column{0.45\textwidth}
-%			\begin{block}{\scriptsize Cross Lingual Fact Representation\footnotemark}
-%				\begin{figure}
-%					\centering
-%					\includegraphics[width=\textwidth]{fact}
-%				\end{figure}
-%			\end{block}
-%		\end{columns}\footcitetext{zhao2024tracing}
-%	\end{frame}
-%	
-%	\begin{frame}{Fact Representation: Training Dataset}
-%		\begin{block}{\scriptsize Effect of Training Data Size}\scriptsize
-%			\begin{itemize}
-%				\item It has been found that the highest correlation (0.51) with probing accuracy (P@1) is observed for data-size of abstracts. 
-%				\item Italian and Japanese have P@1 score of 16.94\% and 1.34\% even though both of these languages are high resource with more than 100 MB of abstracts. 
-%				\item Afrikaans language despite being low resource (\textless 20 MB), shows high precision score (12.05\%) for factual probing.
-%			\end{itemize}
-%		\end{block}
-%		\begin{block}{\scriptsize Factual Probing Results\footnotemark}
-%			\begin{figure}
-%				\centering
-%				\includegraphics[width=0.85\textwidth]{data-volume}
-%			\end{figure}
-%		\end{block}\footcitetext{zhao2024tracing}
-%	\end{frame}
-%	
-%	\begin{frame}{Fact Representation: Tracing Roots}
-%		\begin{block}{\scriptsize Formation of Cross Lingual Fact Representation}\scriptsize
-%			\begin{itemize}
-%				\item To check if a given fact originates from the training data (Wikipedia), the roots is traced. If they co-occur, the fact is considered present, otherwise, it is considered as absent. 
-%				\item Many of the facts that were absent in the knowledge source but correctly predicted were relatively easy to predict because of entity tokens and naming cues.
-%				\item Facts in low resource languages are correctly predicted despite not being verifiable in the training corpus indicating a possibility of cross-lingual transfer.
-%			\end{itemize}
-%		\end{block}
-%		\begin{block}{\scriptsize Predicted Facts Results\footnotemark}
-%			\begin{figure}
-%				\centering
-%				\includegraphics[width=0.7\textwidth]{pred-fact}
-%			\end{figure}
-%		\end{block}\footcitetext{zhao2024tracing}
-%	\end{frame}
-%	
-%	\begin{frame}{Geometry of Language Model Representation}
-%		\begin{block}{\scriptsize Affine Language Subspaces\footnotemark}\scriptsize
-%			\begin{itemize}
-%				\item The space contains embeddings or vectors assigned to tokens based on their semantic or syntactic properties. 
-%				\item Subspaces are low-dimensional vector space within the high-dimensional embedding space that capture certain linguistic properties. 
-%				\item The language sensitive axes are axes (basic vectors) that are within the subspace that capture language-specific information (e.g. grammar). 
-%				\item The language neutral axes are axes that are within the subspace encode information that is common across languages, such as word position or parts of speech.
-%				\item Languages tend to occupy similar linear subspaces in high-dimensional embedding spaces, after mean-centering.
-%			\end{itemize}
-%		\end{block}\footcitetext{chang2022geometry}
-%	\end{frame}
-%	
-%	\begin{frame}{Geometry of Language Model Representation}
-%		\begin{block}{\scriptsize Identification of Affine Language Subspaces}\scriptsize
-%			For a particular \emph{language A}, 512 input sentences are taken(each consists of 512 tokens) --- therefore giving a total 262K contextual tokens.
-%			\begin{equation}
-%				\mathbf{c}^{(i)} \in \mathbb{R}^d \text{ where } i \in \{1, 2, \dots , 262K\}
-%			\end{equation}
-%			\begin{equation}
-%				\bm{\mu}_A = \frac{1}{262K}\sum_{i=1}^{262K} \mathbf{c}^{(i)} \in \mathbb{R}^d \text{  ;  }
-%				S = \frac{1}{262K} \sum_{i = 1}^{262K} (\mathbf{c}^{(i)} - \bm{\mu}_A)(\mathbf{c}^{(i)} - \bm{\mu}_A)^T \in \mathbb{R}^{d \times d}
-%			\end{equation}
-%			After performing the eigenvalue decomposition on $S$, the top $k$ eigenvectors of $S$ are given by $V_A \in \mathbb{R}^{d \times k}$. The language subspace is identified by k eigenvector of $S$. $k$ is selected such that $q/p = 0.9$.
-%			\begin{equation}
-%				E = (\lambda_1, \lambda_2, \dots , \lambda_d) \text{ s.t. } \lambda_i \ge \lambda_{i+1} \quad \forall i \in \{1,2, \dots, d\} \text{    ;    }
-%				q = \sum_{i = 1}^{k} E[i] \text{    ;    }
-%				p = \sum_{i=1}^{d} E[i]
-%			\end{equation}
-%			
-%			The dimension of the context vector $d$ was originally 768 and if the value of reduced dimension $k$ is considered from each of the 12 layers of the transformer then the median value of $k$ was found to be 335.
-%		\end{block}
-%	\end{frame}
-%	
-%	\begin{frame}{Geometry of Language Model Representation}
-%		\begin{block}{\scriptsize Perplexity Ratio}\scriptsize
-%			The perplexity of the LLM is defined as:
-%			\begin{equation}\label{E:pp}
-%				pp(\mathbf{t}^{(i)}, \mathbf{t}^{(i-1)}, \dots , \mathbf{t}^{(1)}) = \prod_{i = 1}^{N} \left[ \frac{1}{\mathbb{P}(\mathbf{t}^{(i)} \mid \mathbf{t}^{(i-1)}, \dots , \mathbf{t}^{(1)})} \right]^{\frac{1}{N}}
-%			\end{equation}		
-%			\begin{equation}
-%				\mathbf{u} = V_A^T(\mathbf{x} - \bm{\mu}_A) \text{    ;    } \hat{\mathbf{x}} = V_A V_A^T (\mathbf{x} - \bm{\mu}_A) + \bm{\mu}_A
-%			\end{equation}
-%			\begin{equation}
-%				\text{Language-A:} \quad \mathbf{x}_A^{(i)[l]} \quad \forall i \in \{1, 2, \dots, N\},\; \forall l \in \{1, 2, \dots, 12\} \Longrightarrow pp_A^{[l]} 
-%			\end{equation}
-%			\begin{equation}
-%				\text{Language-A:} \quad \hat{\mathbf{x}}_A^{(i)[l]} = V_A^{[l]} V_A^{[l]^T} (\mathbf{x}_A^{(i)[l]} - \bm{\mu}_A^{[l]}) + \bm{\mu}_A^{[l]}  \quad \forall i, \; \forall l \Longrightarrow \hat{pp}_{A}^{[l]}
-%			\end{equation}
-%			\begin{equation}
-%				\text{Language-A:} \quad r_A^{[l]} = \frac{\hat{pp}_A^{[l]}}{pp_A^{[l]}} \quad \forall l \in \{0, 1, \dots , 12\}
-%			\end{equation}
-%			The average perplexity ratio over all the 88 languages for each of the layer is calculated as:
-%			\begin{equation}
-%				r^{[l]} = \frac{1}{88} \sum_{i = A}^{CJ} r_i^{[l]} \quad \forall l \in \{0, 1, \dots , 12\}
-%			\end{equation}
-%		\end{block}
-%	\end{frame}
-%	
-%	\begin{frame}{Geometry of Language Model Representation}
-%		\begin{columns}
-%			\column{0.6\textwidth}
-%			\begin{block}{\scriptsize Key Findings}\scriptsize
-%				\begin{itemize}
-%					\item Affine subspaces can be used for language modeling: To reconstruct the vectors of a particular \emph{language A} from its corresponding \emph{language subspace A}, the following equation can be used.
-%						\begin{equation}\label{E:Proj_A}
-%							Proj_A(\mathbf{x}_A) = V_A V_A^T (\mathbf{x}_A - \bm{\mu}_A) + \bm{\mu}_A 
-%						\end{equation}
-%					
-%					\item Language subspaces differed from one another: To reconstruct the vectors of a particular \emph{language A} from another \emph{language subspace B}, the following equation can be used.
-%						\begin{equation}\label{E:Proj_B}
-%							Proj_B(\mathbf{x}_A) = V_B V_B^T (\mathbf{x}_A - \bm{\mu}_B) + \bm{\mu}_B
-%						\end{equation}
-%						
-%					\item Mean-shifted subspaces were similar to one another: To reconstruct the vectors of a particular \emph{language A} after mean centering from another \emph{language subspace B}, the following equation can be used.
-%						\begin{equation}\label{E:Proj_B_mu_A}
-%							Proj_{B, \bm{\mu}_A}(\mathbf{x}_A) = V_B V_B^T (\mathbf{x}_A - \bm{\mu}_A) + \bm{\mu}_A
-%						\end{equation}
-%				\end{itemize}
-%			\end{block}
-%			\column{0.3\textwidth}
-%			\begin{block}{\scriptsize Results\footnotemark}\scriptsize
-%				\begin{figure}
-%					\centering
-%					\includegraphics[width=\textwidth]{proj}
-%				\end{figure}
-%			\end{block}\footcitetext{chang2022geometry}
-%		\end{columns}
-%	\end{frame}
-%	
-%	\begin{frame}{Conclusion}
-%		\begin{block}{\scriptsize Summary}\scriptsize
-%			\begin{itemize}
-%				\item This study highlights the significance of language model fine-tuning techniques such as adapter-based fine-tuning and composable sparse fine-tuning.
-%				
-%				\item Moreover, the analysis of fact representation in language models highlight on the importance of task-specific model editing, cross-lingual fact representation, and the underlying geometry of language model representation. 
-%			\end{itemize}
-%		\end{block}
-%		\begin{block}{\scriptsize Future Directions}\scriptsize
-%			\begin{itemize}
-%				\item We can explore different versions of the Lottery Ticket algorithm to improve efficiency. Additionally, experimenting with other pruning methods like DiffPruning\footnotemark and ChildTuning\footnotemark could help refine our approach. 
-%				\item We can plan to improve how multilingual language models represent factual knowledge across languages. This includes developing better methods for cross-lingual fact representation learning and creating more accurate datasets for probing factual knowledge. 
-%			\end{itemize}
-%		\end{block}
-%		\footcitetext{guo2021parameterefficient}\\
-%		\footcitetext{xu2021raise}
-%	\end{frame}
+\begin{frame}{Results: Language Neuron Overlap for Activation Based Method}
+	\begin{block}{}\scriptsize
+		\begin{figure}[ht]
+			\centering
+			\begin{tabular}{ccc}
+				\includegraphics[width=0.425\textwidth]{Chapters/Chapter_5/lang_neurons/Meta-Llama-3.1-8B/act_prob_90p/lang_neurons_overlap.png} &
+			\end{tabular}
+		\end{figure}
+	\end{block}
+\end{frame}
+
+\begin{frame}{Results: Layer-wise Dist \& Perplexity for Activation Based Method}
+	\begin{columns}
+		\column{0.25\textwidth}
+		\begin{block}{}\scriptsize
+			\begin{figure}[ht]
+				\centering
+				\begin{tabular}{c}
+					\includegraphics[width=0.7\textwidth]{Chapters/Chapter_5/lang_neurons/Meta-Llama-3.1-8B/act_prob_90p/layerwise_lang_neurons_dist.png} 
+				\end{tabular}
+			\end{figure}
+		\end{block}
+		\column{0.65\textwidth}
+		\begin{block}{}\scriptsize
+			\begin{figure}[ht]
+				\centering
+				\begin{tabular}{c}
+					\includegraphics[width=0.6\textwidth]{Chapters/Chapter_5/perplexity/Meta-Llama-3.1-8B/act_prob_95p/ppx_change.png}
+					\end{tabular}
+			\end{figure}
+		\end{block}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Results: Fine-Tuning of Baseline for LAPE}
+	\begin{block}{\scriptsize XNLI Accuracy Results}\scriptsize
+		\begin{table}[ht]
+			\centering
+			\renewcommand{\arraystretch}{1.3}
+			\setlength{\tabcolsep}{8pt}
+			\begin{tabularx}{\textwidth}{|X|X|X|X|}
+				\hline
+				\textbf{Baseline Type} & \textbf{Train Lang} & \textbf{Eval Lang} & \textbf{No Int Accuracy} \\
+				\hline
+				Zero Shot & en & vi & 0.8053 \\
+				& en & hi & 0.7501 \\
+				& en & ur & 0.7002 \\
+				\hline
+				Direct Fine-tuning & vi & vi & 0.8511 \\
+				& hi & hi & 0.8043 \\
+				& ur & ur & 0.6697 \\
+				\hline
+			\end{tabularx}
+		\end{table}
+	\end{block}
+	\begin{block}{\scriptsize Analysis}\scriptsize
+		\begin{itemize}
+			\item The observation that direct fine-tuning for Urdu (ur) yields lower accuracy compared to zero-shot transfer because  the dataset used for fine-tuning might be of low quality.
+			\item The pretrained model’s under-representation of Urdu during training might also limit the efficacy of fine-tuning.
+			\item In contrast, zero-shot transfer utilizes cross-lingual embeddings and the model’s generalized multilingual capabilities, enabling better performance.
+		\end{itemize}
+	\end{block}
+\end{frame}
+	
+\begin{frame}{Results: Targeted Neuron Fine-Tuning for LAPE}
+	\begin{block}{\scriptsize XNLI Accuracy Results for Intervention by Higher Quantiles}\scriptsize
+		\begin{table}[ht]
+			\centering
+			\renewcommand{\arraystretch}{1.3}
+			\setlength{\tabcolsep}{4pt}
+			\begin{tabularx}{\textwidth}{|X|X|X|X|X|X|X|}
+				\hline
+				\textbf{FT Neurons} & \textbf{Eval Lang} & \textbf{No Int} & \textbf{Int by $\mu$} & \textbf{Int by P75} & \textbf{Int by P90} & \textbf{Int by P95} \\
+				\hline
+				null & vi & 0.8053 & 0.7955 & 0.7915 & 0.7903 & 0.7897 \\
+				set1\_en & vi & 0.8017 & 0.7957 & 0.7867 & 0.7847 & 0.7847 \\
+				set1\_vi & vi & 0.8007 & 0.7951 & 0.7881 & 0.7855 & 0.7845 \\
+				set1\_en+vi & vi & 0.8009 & 0.7943 & 0.7865 & 0.7845 & 0.7833 \\
+				\hline
+				null & hi & 0.7501 & 0.7521 & 0.7496 & 0.7499 & 0.7506 \\
+				set1\_en & hi & 0.7476 & 0.7456 & 0.7454 & 0.7448 & 0.7434 \\
+				set6\_en & hi & 0.7491 & 0.7456 & 0.7464 & 0.7458 & 0.7441 \\
+				set6\_hi & hi & 0.7492 & 0.7456 & 0.7461 & 0.7448 & 0.7431 \\
+				set6\_en+hi & hi & 0.7488 & 0.7448 & 0.7451 & 0.7446 & 0.7431 \\
+				\hline
+				null & ur & 0.7002 & 0.7044 & 0.7028 & 0.6938 & 0.6904 \\
+				set6\_en & ur & 0.6984 & 0.7041 & 0.7026 & 0.6964 & 0.6923 \\
+				set6\_ur & ur & 0.6984 & 0.7054 & 0.7024 & 0.6952 & 0.6913 \\
+				set6\_en+ur & ur & 0.6992 & 0.7061 & 0.7021 & 0.6954 & 0.6919 \\
+				\hline
+			\end{tabularx}
+		\end{table}
+	\end{block}
+\end{frame}
+	
+\begin{frame}{Results: Targeted Neuron Fine-Tuning for LAPE}
+	\begin{block}{\scriptsize XNLI Accuracy Results for Intervention by Lower Quantiles}\scriptsize
+		\begin{table}[ht]
+			\centering
+			\renewcommand{\arraystretch}{1.3}
+			\setlength{\tabcolsep}{4pt}
+			\begin{tabularx}{\textwidth}{|X|X|X|X|X|X|X|X|X|}
+				\hline
+				\textbf{FT Neurons} & \textbf{Eval Lang} & \textbf{No Int} & \textbf{Int by P5} & \textbf{Int by P10} & \textbf{Int by P25} & \textbf{Int by P50} \\
+				\hline
+				null & vi & 0.8053 & 0.7366 & 0.7773 & 0.8055 & 0.7971 \\
+				set1\_en & vi & 0.8017 & 0.7432 & 0.7803 & 0.8027 & 0.7923 \\
+				set1\_vi & vi & 0.8007 & 0.7426 & 0.7801 & 0.8029 & 0.7927 \\
+				set1\_en+vi & vi & 0.8009 & 0.7426 & 0.7805 & 0.8027 & 0.7919 \\
+				\hline
+				null & hi & 0.7501 & 0.7488 & 0.7518 & 0.7496 & 0.7526 \\
+				set1\_en & hi & 0.7476 & 0.7451 & 0.7468 & 0.7461 & 0.7451 \\
+				set6\_en & hi & 0.7491 & 0.7464 & 0.7456 & 0.7476 & 0.7468 \\
+				set6\_hi & hi & 0.7492 & 0.7461 & 0.7456 & 0.7464 & 0.7456 \\
+				set6\_en+hi & hi & 0.7488 & 0.7456 & 0.7468 & 0.7462 & 0.7454 \\
+				\hline
+				null & ur & 0.7002 & 0.6861 & 0.6873 & 0.6971 & 0.7054 \\
+				set6\_en & ur & 0.6984 & 0.6886 & 0.6904 & 0.7016 & 0.7031 \\
+				set6\_ur & ur & 0.6984 & 0.6873 & 0.6913 & 0.7011 & 0.7034 \\
+				set6\_en+ur & ur & 0.6992 & 0.6867 & 0.6893 & 0.7016 & 0.7042 \\
+				\hline
+			\end{tabularx}
+		\end{table}
+	\end{block}
+\end{frame}
+	
+\begin{frame}{Results: Targeted Neuron Fine-Tuning for Act\_Prob\_90p}
+	\begin{block}{\scriptsize XNLI Accuracy Results for Intervention by Higher Quantiles}\scriptsize
+		\begin{table}[ht]
+			\centering
+			\renewcommand{\arraystretch}{1.3}
+			\setlength{\tabcolsep}{4pt}
+			\begin{tabularx}{\textwidth}{|X|X|X|X|X|X|X|}
+				\hline
+				\textbf{FT Neurons} & \textbf{Eval Lang} & \textbf{No Int} & \textbf{Int by $\mu$} & \textbf{Int by P75} & \textbf{Int by P90} & \textbf{Int by P95} \\
+				\hline
+				null & vi & 0.8053 & 0.7821 & 0.7891 & 0.7931 & 0.7957 \\
+				en & vi & 0.8027 & 0.7801 & 0.7865 & 0.7907 & 0.7923 \\
+				vi & vi & 0.8005 & 0.7799 & 0.7857 & 0.7901 & 0.7907 \\
+				en+vi & vi & 0.8005 & 0.7799 & 0.7853 & 0.7897 & 0.7909 \\
+				\hline
+				null & hi & 0.7501 & 0.7411 & 0.7268 & 0.7186 & 0.7122 \\
+				en & hi & 0.7492 & 0.7386 & 0.7262 & 0.7214 & 0.7148 \\
+				hi & hi & 0.7486 & 0.7382 & 0.7262 & 0.7212 & 0.7148 \\
+				en+hi & hi & 0.7488 & 0.7372 & 0.7256 & 0.7214 & 0.7144 \\
+				\hline
+				null & ur & 0.7002 & 0.6971 & 0.6978 & 0.6932 & 0.6875 \\
+				en & ur & 0.6994 & 0.7006 & 0.6978 & 0.6937 & 0.6893 \\
+				ur & ur & 0.6988 & 0.7001 & 0.6982 & 0.6935 & 0.6925 \\
+				en+ur & ur & 0.6978 & 0.6992 & 0.6961 & 0.6927 & 0.6915 \\
+				\hline
+			\end{tabularx}
+		\end{table}
+	\end{block}
+\end{frame}	
+	
+\begin{frame}{Results: Targeted Neuron Fine-Tuning for Act\_Prob\_90p}
+	\begin{block}{\scriptsize XNLI Accuracy Results for Intervention by Lower Quantiles}\scriptsize
+		\begin{table}[ht]
+			\centering
+			\renewcommand{\arraystretch}{1.3}
+			\setlength{\tabcolsep}{4pt}
+			\begin{tabularx}{\textwidth}{|X|X|X|X|X|X|X|}
+				\hline
+				\textbf{FT Neurons} & \textbf{Eval Lang} & \textbf{Int by P5} & \textbf{Int by P10} & \textbf{Int by P25} & \textbf{Int by P50} \\
+				\hline
+				null & vi & 0.7653 & 0.7747 & 0.7801 & 0.7835 \\
+				en & vi & 0.7667 & 0.7749 & 0.7789 & 0.7827 \\
+				vi & vi & 0.7653 & 0.7743 & 0.7779 & 0.7817 \\
+				en+vi & vi & 0.7663 & 0.7745 & 0.7795 & 0.7805 \\
+				\hline
+				null & hi & 0.7501 & 0.7468 & 0.7422 & 0.7378 \\
+				en & hi & 0.7481 & 0.7451 & 0.7426 & 0.7378 \\
+				hi & hi & 0.7486 & 0.7456 & 0.7416 & 0.7374 \\
+				en+hi & hi & 0.7491 & 0.7462 & 0.7428 & 0.7364 \\
+				\hline
+				null & ur & 0.6948 & 0.6958 & 0.6954 & 0.6966 \\
+				en & ur & 0.6948 & 0.6946 & 0.6956 & 0.7001 \\
+				ur & ur & 0.6946 & 0.6952 & 0.6952 & 0.6998 \\
+				en+ur & ur & 0.6942 & 0.6964 & 0.6948 & 0.6998 \\
+				\hline
+			\end{tabularx}
+		\end{table}
+	\end{block}
+\end{frame}	
+	
+\begin{frame}{Results: Targeted XNLI Task Neuron Fine-Tuning for Act\_Prob\_90p}
+	\begin{block}{\scriptsize XNLI Accuracy Results for Intervention by Higher Quantiles}\scriptsize
+	\begin{table}[ht]
+		\centering
+		\renewcommand{\arraystretch}{1.3}
+		\setlength{\tabcolsep}{4pt}
+		\begin{tabularx}{\textwidth}{|X|X|X|X|X|X|X|}
+			\hline
+			\textbf{FT Neurons} & \textbf{Eval Lang} & \textbf{No Int} & \textbf{Int by $\mu$} & \textbf{Int by P75} & \textbf{Int by P90} & \textbf{Int by P95} \\
+			\hline
+			null & vi & 0.8053 & 0.7926 & 0.7994 & 0.8014 & 0.8028 \\
+			en & vi & 0.7956 & 0.7926 & 0.8004 & 0.8006 & 0.8026 \\
+			vi & vi & 0.7951 & 0.7926 & 0.7998 & 0.7998 & 0.8014 \\
+			en+vi & vi & 0.7921 & 0.7924 & 0.7982 & 0.7921 & 0.8012 \\
+			\hline
+		\end{tabularx}
+	\end{table}
+	\end{block}
+	\begin{block}{\scriptsize XNLI Accuracy Results for Intervention by Lower Quantiles}\scriptsize
+		
+		\begin{table}[ht]
+			\centering
+			\renewcommand{\arraystretch}{1.3}
+			\setlength{\tabcolsep}{4pt}
+			\begin{tabularx}{\textwidth}{|X|X|X|X|X|X|X|}
+				\hline
+				\textbf{FT Neurons} & \textbf{Eval Lang} & \textbf{Int by P5} & \textbf{Int by P10} & \textbf{Int by P25} & \textbf{Int by P50} \\
+				\hline
+				null & vi & 0.7706 & 0.7801 & 0.7912 & 0.7936 \\
+				en & vi & 0.7702 & 0.7791 & 0.7896 & 0.7926 \\
+				vi & vi & 0.7688 & 0.7774 & 0.7896 & 0.7931 \\
+				\hline
+			\end{tabularx}
+		\end{table}
+	\end{block}
+\end{frame}	
+
+
+\begin{frame}{Conclusions and Future Directions}
+	\begin{columns}
+		\column{0.45\textwidth}
+		\begin{block}{\scriptsize Conclusions}\scriptsize
+			\begin{itemize}
+				\item Statistical activation patterns (e.g., mean, P75, P90, P95) yielded limited consistent improvements across configurations.
+				\item Language-specific neurons derived from Wikipedia data provide strong baselines for zero-shot transfer.
+				\item Zero-shot transfer performance occasionally surpassed direct fine-tuning, particularly in languages like Urdu.
+				\item Interventions using lower quantiles (e.g., P5, P10) degraded performance, while higher quantiles were more effective.
+			\end{itemize}		  
+		\end{block}
+		\column{0.45\textwidth}
+		\begin{block}{\scriptsize Future Directions}\scriptsize
+			\begin{itemize}
+				\item Investigate neuron selection at the attention layer for improved fine-tuning strategies.
+				\item Analyze cross-lingual generalization impacts, especially for low-resource languages.
+				\item Scale methods to larger architectures like Meta-Llama-13B for insights into scalability.
+				\item Explore interpretability to understand why zero-shot transfer sometimes outperforms direct fine-tuning.
+			\end{itemize}
+		\end{block}
+	\end{columns}
+\end{frame}
+
 
 	\section{References}
 	\begin{frame}{References}

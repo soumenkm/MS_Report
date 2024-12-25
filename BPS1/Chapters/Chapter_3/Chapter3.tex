@@ -30,7 +30,7 @@ where $\mathbf{W}_1^i \in \mathbb{R}^{d \times 4d}$ and $\mathbf{W}_2^i \in \mat
 \end{equation}
 where $(\hat{\mathbf{H}}^i \mathbf{W}_1^i)_j$ represents the pre-activation value of the $j^\text{th}$ neuron.
 
-\textbf{Generalized Neuron Formulation}: Recent architectures such as LLaMA utilize Gated Linear Units (GLU) to enhance MLP performance, modifying the MLP computation as:
+\textbf{Generalized Neuron Formulation}: Recent architectures such as LLaMA [\cite{grattafiori2024llama}] utilize Gated Linear Units (GLU) to enhance MLP performance, modifying the MLP computation as:
 \begin{equation}
 \mathbf{h}^i = [ \text{act\_fn}(\hat{\mathbf{H}}^i \mathbf{W}_1^i) \otimes (\hat{\mathbf{H}}^i \mathbf{W}_3^i) ] \cdot \mathbf{W}_2^i,
 \end{equation}
@@ -52,7 +52,7 @@ For the purpose of identifying language-specific neurons, we utilize a subset of
 Each language's dataset is preprocessed and passed through pretrained large language models (LLMs). The activations are then collected from the MLP modules of the models.
 
 \textbf{Dataset Description:}
-The Wikipedia dataset for each language contains a sequence of tokenized text data. Each tokenized sequence has a maximum length of $T_{\max} = 512$. For every sequence, we compute the activations from the MLP module, followed by averaging the activations at each neuron position across all sequences. This provides a language-specific profile for every neuron $(i, j)$ in the model.
+The Wikipedia dataset [\cite{wikidump}] for each language contains a sequence of tokenized text data. Each tokenized sequence has a maximum length of $T_{\max} = 512$. For every sequence, we compute the activations from the MLP module, followed by averaging the activations at each neuron position across all sequences. This provides a language-specific profile for every neuron $(i, j)$ in the model.
 
 \textbf{Activation Collection:} 
 Given a pretrained LLM, let the MLP activation for the $i^\text{th}$ layer and the $j^\text{th}$ neuron in a specific language be represented by $h_{i,j}^t \in \mathbb{R}$, where $t$ indexes the token positions in a sequence of length $T$. The average activation of a neuron across all token positions for a given sequence is computed as:
@@ -101,7 +101,7 @@ where $\mu_{i,j}^{(s,b)}$ is the mean activation of neuron $(i, j)$ for the $s^\
 
 \subsection{LAPE}
 
-Language Activation Probability Entropy (LAPE) is a metric designed to identify neurons that exhibit language-specific behavior across multiple languages. This metric quantifies the entropy of normalized activation probabilities for each neuron across the given set of languages.
+Language Activation Probability Entropy (LAPE) [\cite{tang2024languagespecific}] is a method designed to identify neurons that exhibit language-specific behavior across multiple languages. This metric quantifies the entropy of normalized activation probabilities for each neuron across the given set of languages.
 
 \textbf{Step 1: Compute Activation Probabilities.} 
 For a pretrained large language model with $L$ layers and $4d$ neurons per layer, the activation of a neuron $(i, j)$ in response to a sequence $X^l \in \mathbb{R}^{N \times T}$ (where $N$ is the number of sequences, and $T$ is the number of tokens per sequence) for a language $l$ is denoted as $h_{i,j}^l$. The unnormalized activation probability for neuron $(i, j)$ is given by:
@@ -241,7 +241,7 @@ Once the activation is computed for a task, then we can apply the LAPE or any ac
 
 \section{Neuron Fine-Tuning using LoRA for a Task}
 
-\textbf{LoRA (Low-Rank Adaptation)}: LoRA introduces a mechanism to fine-tune a subset of parameters in neural networks, focusing on reducing computational overhead. For our application, we utilize LoRA to specifically fine-tune targeted neurons in the MLP layer while freezing others. This method ensures that the pretrained parameters \(W_{pt}\) remain untouched, and \(\Delta W\) represents the modifications applied to the network during fine-tuning.
+\textbf{LoRA (Low-Rank Adaptation)}: LoRA [\cite{lora}] introduces a mechanism to fine-tune a subset of parameters in neural networks, focusing on reducing computational overhead. For our application, we utilize LoRA to specifically fine-tune targeted neurons in the MLP layer while freezing others. This method ensures that the pretrained parameters \(W_{pt}\) remain untouched, and \(\Delta W\) represents the modifications applied to the network during fine-tuning.
 
 \textbf{Fine-Tuning with LoRA AB Decomposition.} The matrix \(\Delta W\) is expressed as:
 \begin{equation}

@@ -353,30 +353,6 @@ Table~\ref{tab:xnli_additional_results} extends the evaluation of fine-tuning co
 
 Table~\ref{tab:xnli_results_act_prob_90p} summarizes the results of the XNLI task using the act\_prob\_90p method for fine-tuning. The results evaluate the impact of interventions at various statistical activation thresholds (\textit{Mean, P75, P90, P95}) for the evaluation languages \textit{vi}, \textit{hi}, and \textit{ur}. Different fine-tuning configurations are compared, including null (no targeted neurons fine-tuned), English-specific neurons, target language-specific neurons, and both English and target language neurons combined.
 
-\textbf{Insights from Results of Intervention with Higher Quantiles:}
-\begin{itemize}
-	\item \textbf{Vietnamese (\textit{vi}):} 
-	\begin{itemize}
-		\item The accuracy decreases slightly after interventions with lower quantiles (e.g., P75), but higher quantiles (e.g., P90 and P95) show marginal improvement, particularly in the null configuration.
-		\item The best performance is observed with no intervention (\textit{No Int}), indicating that targeted interventions may slightly disrupt the zero-shot transferability for \textit{vi}.
-		\item Fine-tuning with English and Vietnamese neurons (\textit{en+vi}) yields stable results, demonstrating the robustness of combining targeted neurons.
-	\end{itemize}
-	
-	\item \textbf{Hindi (\textit{hi}):}
-	\begin{itemize}
-		\item Accuracy consistently decreases as the quantile of activation increases. This trend highlights that interventions may inadvertently suppress generalizable linguistic features for \textit{hi}.
-		\item The null configuration (\textit{No Int}) provides the best results, reinforcing that interventions are not always beneficial, especially for languages with unique linguistic patterns.
-		\item The impact of targeted fine-tuning is relatively minimal, with results converging close to the baseline accuracy.
-	\end{itemize}
-	
-	\item \textbf{Urdu (\textit{ur}):}
-	\begin{itemize}
-		\item Results for \textit{ur} are relatively stable, with minor fluctuations across different configurations and intervention thresholds.
-		\item The highest accuracy is observed in the configuration with English neurons (\textit{en}) and interventions at the mean activation level.
-		\item Urdu's unique script and underrepresentation in training data may explain why targeted fine-tuning does not significantly improve results compared to zero-shot transfer.
-	\end{itemize}
-\end{itemize}
-
 These results highlight the nuanced impact of targeted fine-tuning on the XNLI task. While higher quantile interventions can improve robustness, they may also disrupt the generalization capability of the model, as seen in \textit{hi}. For \textit{vi}, the results suggest that linguistic similarity to the training language (\textit{en}) allows for better adaptation even with minimal fine-tuning. However, the relative stability of \textit{ur} results indicates that certain languages may require alternative strategies, such as increasing data representation during training or exploring script-specific adaptations.
 
 \begin{table}[ht]
@@ -408,25 +384,6 @@ These results highlight the nuanced impact of targeted fine-tuning on the XNLI t
 \end{table}
 
 Table~\ref{tab:xnli_results_lower_quantiles} summarizes the results of the XNLI task with interventions at lower quantiles (\textit{P5, P10, P25, P50}). The results evaluate the effect of these interventions on the evaluation languages \textit{vi}, \textit{hi}, and \textit{ur}. These configurations provide insights into how lower activation thresholds influence model performance.
-
-\textbf{Insights from Results of Intervention with Lower Quantiles:}
-\begin{itemize}
-	\item \textbf{Vietnamese (\textit{vi}):}
-	\begin{itemize}
-		\item Interventions across lower quantiles consistently improve performance, with the highest accuracy observed at \textit{P50}.
-		\item The improvements suggest that lower quantile interventions enable better activation tuning for \textit{vi}, potentially due to linguistic similarities with the training language (\textit{en}).
-	\end{itemize}
-	\item \textbf{Hindi (\textit{hi}):}
-	\begin{itemize}
-		\item Accuracy decreases steadily with higher quantiles, with \textit{P5} yielding the best results.
-		\item The trend indicates that interventions targeting lower activations may disrupt the encoded linguistic representations for \textit{hi}.
-	\end{itemize}
-	\item \textbf{Urdu (\textit{ur}):}
-	\begin{itemize}
-		\item Results for \textit{ur} are relatively stable, with minimal fluctuations across quantiles.
-		\item The highest accuracy is achieved with \textit{P50} interventions for some configurations, indicating that Urdu's unique characteristics may benefit from tuning at broader activation thresholds.
-	\end{itemize}
-\end{itemize}
 
 \begin{table}[ht]
 	\centering
@@ -478,14 +435,6 @@ This section presents the experimental results of the Act Prob 90p method using 
 	\label{tab:task_specific_results_90p}
 \end{table}
 
-\textbf{Key Insights of Intervention with Higher Quantiles:}
-\begin{itemize}
-	\item The highest accuracy (0.8053) was observed in the null configuration without intervention, suggesting that task-specific neurons retain considerable generalization capacity in zero-shot transfer settings.
-	\item Interventions using higher quantiles (P90, P95) generally resulted in the most significant recovery or improvement in performance across configurations.
-	\item Fine-tuning task neurons from the evaluation language (\textit{vi}) provided competitive results, indicating that task-specific activations effectively capture task-relevant features.
-	\item The combined fine-tuning configuration (\textit{en+vi}) exhibited the lowest baseline accuracy, highlighting potential conflicts between task-specific neuron activations of different languages.
-\end{itemize}
-
 Table \ref{tab:task_specific_results_p5_p50} provides additional experimental results for the Act Prob 90p method using task-specific neurons with interventions applied at lower quantiles (P5 to P50). The evaluations were performed on the Vietnamese (\textit{vi}) target language under different fine-tuning configurations.
 
 \begin{table}[ht]
@@ -505,12 +454,6 @@ Table \ref{tab:task_specific_results_p5_p50} provides additional experimental re
 	\label{tab:task_specific_results_p5_p50}
 \end{table}
 
-\textbf{Key Insights of Intervention with Lower Quantiles:}
-\begin{itemize}
-	\item Performance consistently improves as the intervention quantile increases from P5 to P50, demonstrating the effectiveness of higher quantile activations in enhancing accuracy.
-	\item The null configuration achieves the highest accuracy at P50 (0.7936), indicating that task-specific neurons alone provide a robust representation for zero-shot transfer scenarios.
-	\item Fine-tuning on English neurons (\textit{en}) and Vietnamese neurons (\textit{vi}) exhibits competitive performance, but the gains are marginal compared to the null configuration, highlighting the strong baseline capability of task-specific neurons.
-\end{itemize}
 
 
 

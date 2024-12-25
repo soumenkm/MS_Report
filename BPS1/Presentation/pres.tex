@@ -12,8 +12,8 @@
 \setbeamerfont{footnote}{size=\tiny}
 
 \title[MS by Research: BPS (Autumn 2024)]{Improving Downstream Task Performance in Multilingual LLMs by Intervening Language Specific Neurons}
-\author[Soumen Mondal]{Soumen Kumar Mondal\\\texttt{23m2157@iitb.ac.in}}
-\institute[IIT Bombay]{Guide: Prof. Preethi Jyothi\\\;\\Indian Institute of Technology Bombay}
+\author[Soumen Mondal]{\textcolor{blue}{Soumen Kumar Mondal} \\\texttt{23m2157@iitb.ac.in}}
+\institute[IIT Bombay]{Guide: Prof.~Preethi Jyothi\\\;\\MS by Research in Data Science and Artificial Intelligence\\Center for Machine Intelligence and Data Science (CMInDS)\\Indian Institute of Technology Bombay}
 \date{December 26, 2024}
 
 \begin{document}
@@ -80,12 +80,27 @@
 	\end{frame}
 	
 	
-		\begin{frame}{Methodology: LAPE}
-		\begin{columns}
-	\column{0.5\textwidth}
-	\begin{block}{\scriptsize What is a LAPE?}\scriptsize
+\begin{frame}{Methodology: LAPE}
+	\begin{columns}
+	\column{0.55\textwidth}
+	\begin{block}{\scriptsize LAPE Neurons (Tang et. al., 2024)}\scriptsize
 		\begin{itemize}
-			\item A
+			\item To identify neurons with significant language-specific behavior, a threshold (for Wikipedia dataset) is defined as:
+			\begin{equation}
+				\tau = \text{Quantile}_{0.95}\left(p_{i,j}^l \, | \, \forall i, j, l\right).
+			\end{equation}
+			\item A neuron $(i, j)$ is considered as language neuron if:
+			\begin{equation}
+				\exists l \in \{1, \dots, k\} \, \text{such that} \, p_{i,j}^l > \tau
+			\end{equation}
+			
+			\item Only 1\% ($m = 0.01 \times 4d \times L$) of neurons with lowest LAPE values are selected for as language neurons.
+			\begin{equation}
+				LN = \text{argsort}_m \left\{\text{LAPE}(i,j) \,|\, \forall i, j, \exists l \,\, s.t. \,\,  p_{i,j}^l > \tau \right\}
+			\end{equation}
+			\begin{equation}
+				LSN(i, j) = \left\{ l \, | \, p_{i,j}^l > \tau \land (i,j) \in LN \right\}
+			\end{equation}
 		\end{itemize}		  
 	\end{block}
 	\column{0.4\textwidth}
@@ -98,6 +113,144 @@
 \end{columns}
 	\end{frame}
 	
+\begin{frame}{Methodology: Activation Based Methods}
+	\begin{columns}
+		\column{0.5\textwidth}
+		\begin{block}{\scriptsize Neuron Relevance}\scriptsize
+			\begin{itemize}
+				\item \textbf{Activation Probability 90p:} Measures the probability of a neuron's activation exceeding the 90th percentile value for its layer.
+				\item Relevance for a neuron \((i, j)\) in language \(l\) is computed from its activation against Wikipedia dataset:
+				\begin{equation}
+					P_q(h_{i,j}^l) = \inf \left\{x \in \mathbb{R} : CDF_{h_{i,j}^l}(x) \geq q \right\}
+				\end{equation}
+				\begin{equation}
+					r_{i,j}^l = \mathbb{E}\left[\mathbb{I}\left(h_{i,j}^l > P_{0.9}(h_{i,j}^l)\right)\right]
+				\end{equation}
+				\item Aggregates relevance values across neurons:
+				\begin{equation}
+					R^l = \{r_{i,j}^l \, | \, i \in \{1, \dots, L\}, \, j \in \{1, \dots, 4d\}\}.
+				\end{equation}
+			\end{itemize}		  
+		\end{block}
+		\column{0.4\textwidth}
+		\begin{block}{\scriptsize Activation Based Neurons}\scriptsize
+			\begin{itemize}
+				\item \textbf{Selection Process:} Identify top neurons with the highest relevance for each language.
+				\item Select top $0.125\%$ neurons per language based on their maximum relevance:
+				\begin{equation}
+					 m = \frac{0.125 \times L \times 4d}{100}
+				\end{equation}
+				\begin{equation}
+					N^l = \text{argsort\_desc}_m \left\{r_{i,j}^l \, | \, \forall i, j\right\}
+				\end{equation}
+				\item This process ensures that neurons with the highest language-specific relevance are identified for each language.
+			\end{itemize}
+		\end{block}
+	\end{columns}
+\end{frame}
+
+	
+\begin{frame}{Methodology: Neuron Fine-Tuning using LoRA}
+	\begin{columns}
+		\column{0.55\textwidth}
+		\begin{block}{\scriptsize LoRA Fine-Tuning for a Task}\scriptsize
+			\begin{itemize}
+				\item \textbf{LoRA Mechanism:} Fine-tunes a subset of parameters in neural networks by introducing a low-rank decomposition:
+				\begin{equation}
+					[\text{masked\_A}]_{ij} = 1, \forall i \in \{1, \dots, d\}, \, \forall j \in \{1, \dots, r\}
+				\end{equation}
+				\begin{equation}
+					[\text{masked\_B}]_{ij} = 
+					\begin{cases} 
+						0, & \text{if } j \in \text{Frozen Neurons}, \\
+						1, & \text{otherwise}.
+					\end{cases}
+				\end{equation}
+				\item To freeze specific neurons, columns of B corresponding to the frozen neurons are masked with zeros. This prevents any updates to these neurons during fine-tuning.
+				\begin{equation}
+					\Delta W_{i,j} = 0, \quad \forall i \in {1, \dots, d}, \forall j \in \text{Frozen Neurons}
+				\end{equation}
+				\item LoRA fine-tunes the MLP layer for the trainable language neurons and attention layer (\(q, k, v, o\) projections). The task-specific classifier head is fully trained.
+
+			\end{itemize}		  
+		\end{block}
+		\column{0.4\textwidth}
+		\begin{block}{\scriptsize Targeted LoRA Fine-Tuning Example}
+			\begin{figure}
+				\centering
+				\includegraphics[width=\textwidth]{Chapters/Chapter_3/lora.pdf}
+			\end{figure}
+		\end{block}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Experiments: Dataset and Baseline}
+	\begin{columns}
+		\column{0.45\textwidth}
+		\begin{block}{\scriptsize Task and Dataset: XNLI}\scriptsize
+			\begin{itemize}
+				\item \textbf{XNLI Task:} Multilingual natural language inference task to classify relationships between premise and hypothesis into \textit{entailment}, \textit{neutral}, or \textit{contradiction}.
+				\item \textbf{Dataset:} Sentence pairs annotated across 15 languages. Focused on English (\textit{en}) as source language and Vietnamese (\textit{vi}), Hindi (\textit{hi}), and Urdu (\textit{ur}) as target languages.
+				\item For the experiments, a fraction \(\mathcal{F}\) is used to train the model as $|\mathcal{D}_l^\text{train}| = 400K$.
+				\begin{equation}
+					|\mathcal{F}| = \text{frac} \times |\mathcal{D}_l^\text{train}|
+				\end{equation}
+				where \(\text{frac} = 0.25\) is the fraction of the training dataset used.
+				\item \textbf{Objective:} Improving the zero-shot performance for low-resource languages (\textit{vi}, \textit{hi}, \textit{ur}).
+			\end{itemize}		  
+		\end{block}
+		\column{0.45\textwidth}
+		\begin{block}{\scriptsize Baseline Experiments (No Eval Time Interventions!)}\scriptsize
+			\begin{itemize}
+				\item \textbf{Zero-Shot Baseline:} Fine-tune on English (\textit{en}) XNLI dataset. Evaluate zero-shot transfer to target languages (\textit{vi}, \textit{hi}, \textit{ur}):
+				\begin{equation}
+					\text{Accuracy} = \frac{\sum_{i=1}^N \mathbb{I}(\hat{y}^i = y^i)}{N}
+				\end{equation}
+				where \(N\) is the total test examples.
+				\item \textbf{Direct Fine-Tuning Baseline:} Fine-tune on target language such as Vietnamese (\textit{vi}) XNLI dataset to establish the upper bound for \textit{vi} performance. Accuracy remains the evaluation metric.
+			\end{itemize}
+		\end{block}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Experiments: Goals and Fine-Tuning Strategy}
+	\begin{columns}
+		\column{0.55\textwidth}
+		\begin{block}{\scriptsize Experiment Goals}\scriptsize
+			\begin{itemize}
+				\item \textbf{Objective:} Improve zero-shot performance on target language (\textit{vi}) without using target language training data.
+				\item \textbf{Constraints:}
+				\begin{itemize}\scriptsize
+					\item No target language training data (\textit{vi}) allowed.
+					\item Only English (\textit{en}) XNLI training data available.
+					\item Use model surgery techniques (e.g., neuron fine-tuning, activation pattern interventions).
+				\end{itemize}
+				\item \textbf{Target Metric:}
+				\begin{equation}
+					\Delta_\text{ZS} = \text{Acc}(\mathcal{M}_\text{experiment}) - \text{Acc}(\mathcal{M}_\text{en})
+				\end{equation}
+				\item Maximize \(\Delta_\text{ZS}\) to close the performance gap between zero-shot and direct fine-tuning.
+				
+			\end{itemize}		  
+		\end{block}
+		\column{0.4\textwidth}
+		\begin{block}{\scriptsize Fine-Tuning Setups}\scriptsize
+			\begin{itemize}
+				\item \textbf{Setup A:} Standard fine-tuning using LoRA applied to \(q, k, v, o\) projection matrices and the classification head. Evaluated with statistical activation substitutions (\(\mu, 90p, 95p\), etc.).
+				\item \textbf{Setup B:} Fine-tuning with LoRA targeting English-specific neurons (\(\mathcal{N}_\text{en}\)) in the MLP block.
+				\item \textbf{Setup C:} Fine-tuning with LoRA targeting Vietnamese-specific neurons (\(\mathcal{N}_\text{vi}\)) in the MLP block.
+				\item \textbf{Setup D:} Combined fine-tuning targeting both English (\(\mathcal{N}_\text{en}\)) and Vietnamese (\(\mathcal{N}_\text{vi}\)) neurons with LoRA.
+				
+			\end{itemize}
+		\end{block}
+	\end{columns}
+\end{frame}
+
+
+
+
+
+
 	
 %	\begin{frame}{Language Model Fine Tuning: MAD-X}
 %		\begin{columns}

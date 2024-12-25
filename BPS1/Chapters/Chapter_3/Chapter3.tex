@@ -134,9 +134,9 @@ A neuron $(i, j)$ is considered for language-specific analysis only if:
 \end{equation}
 
 \textbf{Step 5: Select Top Neurons Based on LAPE.} 
-The top $m$ neurons with the lowest LAPE values are selected for language-specific analysis, where $m$ is defined as:
+Only 1\% neurons with the lowest LAPE values are selected for language-specific analysis, where $m$ is defined as:
 \begin{equation}
-	m = \frac{0.01 \times 4d \times L}{100}.
+	m = \frac{1 \times 4d \times L}{100}.
 \end{equation}
 The top \(m\) neurons are identified by sorting the LAPE values and selecting the indices of the \(m\) smallest values:
 \begin{equation}
